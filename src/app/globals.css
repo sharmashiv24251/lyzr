@@ -1,5 +1,8 @@
 :root {
   --lz-accent: #C1502E;
+  --lz-text-secondary: #5C5C58;
+  /* WCAG AA on white, including the smallest metadata labels. */
+  --lz-text-muted: #767670;
   --lz-tint: color-mix(in oklch, var(--lz-accent) 8%, white);
   --lz-hair: color-mix(in oklch, var(--lz-accent) 17%, white);
   --lz-tint2: color-mix(in oklch, var(--lz-accent) 30%, white);
@@ -238,7 +241,7 @@ button:active,
    ------------------------------------------------------------------ */
 
 [data-dim="1"] {
-  color: #A2A29C;
+  color: var(--lz-text-muted);
   transition: color 220ms var(--ease-out);
 }
 
@@ -537,7 +540,7 @@ button:active,
   display: grid;
   place-items: center;
   font-size: 10.5px;
-  color: #B4B4AE;
+  color: var(--lz-text-muted);
   line-height: 1;
   transition: transform 180ms var(--ease-out), background-color 180ms var(--ease-out), color 180ms var(--ease-out);
 }
@@ -557,7 +560,7 @@ button:active,
   display: block;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 9px;
-  color: #BDBDB7;
+  color: var(--lz-text-muted);
   text-align: center;
   letter-spacing: .02em;
   line-height: 1.25;

@@ -61,7 +61,7 @@
 }
 
 .navLink {
-  color: #5C5C58;
+  color: var(--lz-text-secondary);
   text-decoration: none;
   font-weight: 500;
   padding: 6px 2px;
@@ -358,7 +358,7 @@
   }
 
   .mobileNavArrow {
-    color: #A2A29C;
+    color: var(--lz-text-muted);
     font-size: 14px;
     transition: transform 160ms var(--ease-out), color 160ms var(--ease-out);
   }
@@ -460,4 +460,3 @@
     corner-shape: squircle;
   }
 }
-

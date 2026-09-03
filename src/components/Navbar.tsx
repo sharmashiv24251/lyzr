@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import s from "./Navbar.module.css";
 
 interface NavItem {
@@ -68,13 +69,14 @@ export default function Navbar() {
           {/* Brand Logo */}
           <div className={s.brandGroup}>
             <a href="#top" aria-label="Lyzr Home" className={s.brandLogo} onClick={closeMenu}>
-              <img
+              <Image
                 src="/assets/lyzr-wordmark-light.png"
                 alt="Lyzr"
-                width="441"
-                height="170"
+                width={441}
+                height={170}
                 loading="eager"
-                decoding="async"
+                fetchPriority="high"
+                sizes="67px"
                 className={s.logoImage}
               />
             </a>
