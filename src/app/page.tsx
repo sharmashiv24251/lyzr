@@ -173,7 +173,7 @@ export default function LandingPage() {
           <div style={{ display: "flex", gap: "8px", padding: "10px 14px", borderBottom: "1px solid #F4F4F0", fontSize: "13px", alignItems: "center" }}><span style={{ flex: "1.5", fontWeight: "500", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>KYC Reviewer</span><span style={{ flex: "1", color: "var(--lz-text-muted)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px" }}>azure ai</span><span style={{ flex: ".85", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "var(--lz-text-secondary)" }}>6,110</span><span style={{ flex: ".6", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#5C7A66" }}>LIVE</span></div>
           <div style={{ display: "flex", gap: "8px", padding: "10px 14px", borderBottom: "1px solid #F4F4F0", fontSize: "13px", alignItems: "center" }}><span style={{ flex: "1.5", fontWeight: "500", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Collections Desk</span><span style={{ flex: "1", color: "var(--lz-text-muted)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px" }}>langchain</span><span style={{ flex: ".85", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "var(--lz-text-secondary)" }}>2,988</span><span style={{ flex: ".6", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#5C7A66" }}>LIVE</span></div>
           <div style={{ display: "flex", gap: "8px", padding: "10px 14px", borderBottom: "1px solid #F4F4F0", fontSize: "13px", alignItems: "center" }}><span style={{ flex: "1.5", fontWeight: "500", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Renewals Analyst</span><span style={{ flex: "1", color: "var(--lz-text-muted)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px" }}>vertex</span><span style={{ flex: ".85", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "var(--lz-text-secondary)" }}>941</span><span style={{ flex: ".6", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "var(--lz-text-muted)" }}>STAGED</span></div>
-          <div style={{ display: "flex", gap: "8px", padding: "10px 14px", fontSize: "13px", alignItems: "center", background: "var(--lz-tint,#FBF3EF)", animation: "lzRowIn 8s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ flex: "1.5", fontWeight: "500", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Vendor Diligence</span><span style={{ flex: "1", color: "var(--lz-text-muted)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px" }}>agentforce</span><span style={{ flex: ".85", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "var(--lz-ink2,#B08574)" }}>—</span><span style={{ flex: ".6", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "var(--lz-accent,#C1502E)" }}>SYNCED</span></div>
+          <div style={{ display: "flex", gap: "8px", padding: "10px 14px", fontSize: "13px", alignItems: "center", background: "var(--lz-tint,#FBF3EF)", animation: "lzRowIn 8s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ flex: "1.5", fontWeight: "500", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Vendor Diligence</span><span style={{ flex: "1", color: "var(--lz-text-muted)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px" }}>agentforce</span><span style={{ flex: ".85", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "var(--lz-ink2,#B08574)" }}></span><span style={{ flex: ".6", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "var(--lz-accent,#C1502E)" }}>SYNCED</span></div>
         </div>
       </div>
 
@@ -354,7 +354,7 @@ export default function LandingPage() {
 
     <div data-reveal="1" style={{ flex: "1 1 250px", minWidth: "0", maxWidth: "340px", display: "flex", flexDirection: "column", gap: "12px" }}>
       <div data-squircle="" style={{ borderRadius: "var(--radius-lg, 14px)", overflow: "hidden", background: "#E9E9E4", flex: "1 1 auto" }}>
-        <ImageSlot id="lz-founder" shape="rect" placeholder="Founder portrait — Siva Surendira (lyzr.ai)" style={{ width: "100%", height: "auto", aspectRatio: "4/5" }} src="/assets/founder-siva.webp" />
+        <ImageSlot id="lz-founder" shape="rect" placeholder="Founder portrait · Siva Surendira (lyzr.ai)" style={{ width: "100%", height: "auto", aspectRatio: "4/5" }} src="/assets/founder-siva.webp" />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "0 2px" }}>
         <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-text-muted)" }}>jersey city</span>
@@ -368,7 +368,7 @@ export default function LandingPage() {
         <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)" }}>a note from the founder</span>
         <span style={{ flex: "1", height: "1px", background: "var(--lz-hair,#EFE1DB)" }}></span>
       </div>
-      <p data-reveal="1" style={{ margin: "clamp(20px,2.2vw,28px) 0 0", fontSize: "clamp(18px,1.7vw,26px)", lineHeight: "1.42", letterSpacing: "-.022em", color: "#1A1A18", maxWidth: "26em" }}>Most agent platforms sell you tools and leave your team to work out the rest. We think building an agent is the easy part now — productionisation is where the real work starts.</p>
+      <p data-reveal="1" style={{ margin: "clamp(20px,2.2vw,28px) 0 0", fontSize: "clamp(18px,1.7vw,26px)", lineHeight: "1.42", letterSpacing: "-.022em", color: "#1A1A18", maxWidth: "26em" }}>Most agent platforms sell you tools and leave your team to work out the rest. We think building an agent is the easy part now. Productionisation is where the real work starts.</p>
       <p data-reveal="1" style={{ margin: "clamp(14px,1.4vw,20px) 0 0", fontSize: "clamp(15px,1.15vw,17.5px)", lineHeight: "1.62", color: "var(--lz-text-secondary)", letterSpacing: "-.012em", maxWidth: "32em" }}>So we operate like Palantir for the agent era: platform and people together, our engineers deep in your data, staying until the thing is live and governed. That is the whole company.</p>
       <div data-reveal="1" style={{ marginTop: "auto", paddingTop: "clamp(24px,2.6vw,36px)" }}>
         <div style={{ height: "1px", background: "#EDEDE8", marginBottom: "16px" }}></div>
@@ -405,7 +405,7 @@ export default function LandingPage() {
         <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-text-muted)" }}>week 5–7</div>
           <div style={{ fontSize: "clamp(17px,1.3vw,21px)", fontWeight: "500", letterSpacing: "-.02em", marginTop: "9px", lineHeight: "1.25" }}>Harden it</div>
-          <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Simulation, policy, guardrails and sign-off — the part most projects skip.</p>
+          <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Simulation, policy, guardrails and sign-off. The part most projects skip.</p>
         </div>
         <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)" }}>week 8</div>
@@ -414,7 +414,7 @@ export default function LandingPage() {
         </div>
       </div>
       <div data-reveal="1" style={{ marginTop: "clamp(26px,3vw,40px)", paddingTop: "22px", borderTop: "1px solid #E4E4DF", display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center", justifyContent: "space-between" }}>
-        <p style={{ margin: "0", fontSize: "15px", color: "#6E6E68", letterSpacing: "-.008em", maxWidth: "38em" }}>Prefer to move alone, or through a partner? Both work — 100+ partners deliver on Lyzr across BFSI, healthcare and telco.</p>
+        <p style={{ margin: "0", fontSize: "15px", color: "#6E6E68", letterSpacing: "-.008em", maxWidth: "38em" }}>Prefer to move alone, or through a partner? Both work. 100+ partners deliver on Lyzr across BFSI, healthcare and telco.</p>
         <a href="#cta" data-squircle="" style={{ fontSize: "15px", fontWeight: "500", padding: "12px 20px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #DEDED9", whiteSpace: "nowrap" }}>Find a partner</a>
       </div>
     </div>
@@ -432,7 +432,7 @@ export default function LandingPage() {
             data-res-book=""
             shape="rect"
             src="/assets/cover-3.webp"
-            placeholder="The Agentic AI Roadmap — playbook cover"
+            placeholder="The Agentic AI Roadmap · playbook cover"
             style={{
               position: "absolute",
               width: "76%",
@@ -455,7 +455,7 @@ export default function LandingPage() {
             data-res-book=""
             shape="rect"
             src="/assets/cover-1.webp"
-            placeholder="101 Enterprise AI Use Cases — template cover"
+            placeholder="101 Enterprise AI Use Cases · template cover"
             style={{
               position: "absolute",
               width: "76%",
@@ -478,7 +478,7 @@ export default function LandingPage() {
             data-res-book=""
             shape="rect"
             src="/assets/cover-2.webp"
-            placeholder="Prototype to Production — field guide cover"
+            placeholder="Prototype to Production · field guide cover"
             style={{
               position: "absolute",
               width: "76%",

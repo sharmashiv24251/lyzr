@@ -706,7 +706,7 @@ export default function ToolSprawl() {
       ref={ref}
       className={s.frame}
       role="img"
-      aria-label="Disparate developer and ops tools — cloud instances, left-aligned developer terminal, workflow node graph, vibrating P1 incident, green Excel spreadsheet, team chat, model form, and trace waterfall."
+      aria-label="Disparate developer and ops tools: cloud instances, left-aligned developer terminal, workflow node graph, vibrating P1 incident, green Excel spreadsheet, team chat, model form, and trace waterfall."
     >
       <div className={cls}>
         <Arrows id="ts-a" box="0 0 1400 900" paths={ARROWS_A} cls={s.arrowsA} />

@@ -162,7 +162,7 @@ const ACTS: Act[] = [
     intercept: false,
     caption: (
       <>
-        Plain language in, a working agent out — logic, integrations, access
+        Plain language in, a working agent out: logic, integrations, access
         control and interface, wired into the systems you already run.{" "}
         <b>Governance is applied at build time, not bolted on afterwards.</b>
       </>
@@ -178,7 +178,7 @@ const ACTS: Act[] = [
       <>
         Every agent your organisation runs, whoever built it and wherever it
         runs, with an owner against each one.{" "}
-        <b>Registration is a gate, not a request</b> — an unregistered agent
+        <b>Registration is a gate, not a request</b> and an unregistered agent
         cannot deploy.
       </>
     ),
@@ -224,7 +224,7 @@ const ACTS: Act[] = [
           With one it carries a name, an owner, a timestamp and a policy
           version
         </b>{" "}
-        — and the record cannot be edited after the fact.
+        and the record cannot be edited after the fact.
       </>
     ),
   },
@@ -266,7 +266,7 @@ const AGENTS = [
   { name: "Collections Desk", id: "collections-desk-v1.7", owner: "M. Osei", init: "MO", on: "langchain", logo: "/assets/logos/langchain.svg", runs: "2,988", p95: "3.1s", state: "LIVE", tone: "ok" },
   { name: "Dispute Resolver", id: "dispute-resolver-v2.3", owner: "P. Raman", init: "PR", on: "bedrock", logo: "/assets/logos/bedrock.svg", runs: "1,204", p95: "2.2s", state: "LIVE", tone: "ok" },
   { name: "Renewals Analyst", id: "renewals-analyst-v0.9", owner: "J. Whitmore", init: "JW", on: "vertex", logo: "/assets/logos/vertex.svg", runs: "941", p95: "2.8s", state: "STAGED", tone: "idle" },
-  { name: "Vendor Diligence", id: "vendor-diligence-v1.0", owner: "A. Nayar", init: "AN", on: "agentforce", logo: "/assets/logos/agentforce.svg", runs: "—", p95: "—", state: "SYNCED", tone: "idle" },
+  { name: "Vendor Diligence", id: "vendor-diligence-v1.0", owner: "A. Nayar", init: "AN", on: "agentforce", logo: "/assets/logos/agentforce.svg", runs: "", p95: "", state: "SYNCED", tone: "idle" },
 ];
 
 const STAGES = [
@@ -275,15 +275,15 @@ const STAGES = [
   { name: "Build image", state: "passed", dur: "3m 12s", tone: "pass" },
   { name: "Non-prod", state: "passed", dur: "1m 04s", tone: "pass" },
   { name: "Evaluation gate", state: "failed", dur: "2m 18s", tone: "fail" },
-  { name: "Approval", state: "blocked", dur: "—", tone: "idle" },
-  { name: "Prod deploy", state: "blocked", dur: "—", tone: "idle" },
+  { name: "Approval", state: "blocked", dur: "", tone: "idle" },
+  { name: "Prod deploy", state: "blocked", dur: "", tone: "idle" },
 ];
 
 const COMMITS = [
   { sha: "a71a73d", msg: "Improve grounding on edge cases", who: "@priya", evals: "18/20", dur: "2m 18s", env: "non-prod", verdict: "blocked", tone: "fail", open: true },
   { sha: "608472f", msg: "Update RAI policy config", who: "@arjun", evals: "20/20", dur: "1m 51s", env: "prod", verdict: "deployed", tone: "idle" },
   { sha: "3bc91e2", msg: "Add hallucination threshold adjustment", who: "@mei", evals: "20/20", dur: "2m 04s", env: "prod", verdict: "deployed", tone: "idle" },
-  { sha: "d4f12a9", msg: "Refund logic fix", who: "@priya", evals: "16/20", dur: "2m 33s", env: "—", verdict: "rolled back", tone: "fail" },
+  { sha: "d4f12a9", msg: "Refund logic fix", who: "@priya", evals: "16/20", dur: "2m 33s", env: "", verdict: "rolled back", tone: "fail" },
 ];
 
 const EVAL_CHECKS = [

@@ -21,13 +21,13 @@ const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.lyzr.ai").repl
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Lyzr — Agents in production",
+  title: "Lyzr · Agents in production",
   description:
-    "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+    "Lyzr is the layer between a working agent and a governed one, with registry, policy, simulation, observability and guardrails running inside your own cloud.",
   openGraph: {
-    title: "Lyzr — Agents in production",
+    title: "Lyzr · Agents in production",
     description:
-      "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+      "Lyzr is the layer between a working agent and a governed one, with registry, policy, simulation, observability and guardrails running inside your own cloud.",
     url: baseUrl,
     siteName: "Lyzr",
     images: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Lyzr — Agents in production",
+        alt: "Lyzr · Agents in production",
       },
     ],
     locale: "en_US",
@@ -43,9 +43,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lyzr — Agents in production",
+    title: "Lyzr · Agents in production",
     description:
-      "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+      "Lyzr is the layer between a working agent and a governed one, with registry, policy, simulation, observability and guardrails running inside your own cloud.",
     images: ["/og-image.png"],
   },
 };
