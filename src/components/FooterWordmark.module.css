@@ -1,0 +1,29 @@
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 28px auto 0;
+  padding: 0;
+  line-height: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 90%;
+    margin: 4px auto 0;
+  }
+}
+
+.link {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

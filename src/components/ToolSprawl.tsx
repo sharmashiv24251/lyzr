@@ -681,7 +681,9 @@ export default function ToolSprawl() {
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    setPhase("armed");
+    const frame = requestAnimationFrame(() => {
+      setPhase("armed");
+    });
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
@@ -692,6 +694,7 @@ export default function ToolSprawl() {
     );
     io.observe(el);
     return () => {
+      cancelAnimationFrame(frame);
       io.disconnect();
     };
   }, []);

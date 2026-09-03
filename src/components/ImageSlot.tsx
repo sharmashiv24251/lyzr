@@ -64,7 +64,6 @@ export default function ImageSlot({
             {webpSrc && webpSrc !== resolvedSrc && (
               <source srcSet={webpSrc} type="image/webp" />
             )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={resolvedSrc}
               alt={placeholder || ""}

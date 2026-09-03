@@ -6,6 +6,7 @@ import AgentLifecycle from "@/components/AgentLifecycle";
 import PlatformVideo from "@/components/PlatformVideo";
 import ToolSprawl from "@/components/ToolSprawl";
 import Navbar from "@/components/Navbar";
+import FooterWordmark from "@/components/FooterWordmark";
 
 interface BrandTile {
   name: string;
@@ -34,58 +35,69 @@ const BRAND_TILES: readonly BrandTile[] = [
 export default function LandingPage() {
   const [sovereignTab, setSovereignTab] = useState<"vpc" | "optimus">("vpc");
   useEffect(() => {
-    // 1. Reveal observer
-    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
-    const ease = 'cubic-bezier(.16,1,.3,1)';
-    const show = () =>
-      els.forEach((e) => {
-        e.dataset.revealed = '1';
-        e.style.opacity = '1';
-        e.style.transform = 'none';
-        e.style.willChange = 'auto';
-      });
+    // 0. Ensure refresh starts at top and prevent mobile browsers from restoring stale/collapsed scroll positions
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      const navEntry = performance.getEntriesByType?.("navigation")?.[0] as PerformanceNavigationTiming | undefined;
+      const isReload = navEntry?.type === "reload";
+      if (isReload || window.location.hash === "#cta" || window.location.hash === "#top") {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.visibilityState !== 'visible') {
-      show();
+    // 1. Orchestrated Section-by-Section Staggered Reveal Engine
+    const allRevealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const groups = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal-group]'));
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      allRevealEls.forEach((e) => e.classList.add('lz-in'));
     } else {
-      els.forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(16px)';
-        el.style.willChange = 'opacity,transform';
-      });
-
-      const failsafe = setTimeout(() => {
-        els.forEach((e) => {
-          if (e.dataset.revealed === '1') return;
-          e.dataset.revealed = '1';
-          e.style.transition = 'opacity .5s ' + ease;
-          e.style.opacity = '1';
-          e.style.transform = 'none';
-        });
-      }, 900);
-
-      const io = new IntersectionObserver(
+      // Group Observer: triggers staggered cascades for direct [data-reveal] items in this group
+      const groupIo = new IntersectionObserver(
         (entries) => {
-          entries.forEach((e) => {
-            if (!e.isIntersecting) return;
-            const el = e.target as HTMLElement;
-            const sibs = Array.from(el.parentElement ? el.parentElement.children : []).filter(
-              (n) => n.hasAttribute && (n as HTMLElement).hasAttribute('data-reveal')
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const group = entry.target as HTMLElement;
+            const items = Array.from(group.querySelectorAll<HTMLElement>('[data-reveal]')).filter(
+              (el) => el.closest('[data-reveal-group]') === group
             );
-            const d = Math.min(sibs.indexOf(el), 3) * 70;
-            el.dataset.revealed = '1';
-            el.style.transition = 'opacity .78s ' + ease + ' ' + d + 'ms, transform .78s ' + ease + ' ' + d + 'ms';
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-            setTimeout(() => {
-              el.style.willChange = 'auto';
-            }, 1000 + d);
-            io.unobserve(el);
+            const step = parseInt(group.getAttribute('data-reveal-step') || '50', 10);
+
+            items.forEach((el, index) => {
+              if (el.classList.contains('lz-in')) return;
+              const explicitDelay = el.getAttribute('data-reveal-delay');
+              const d = explicitDelay !== null ? parseInt(explicitDelay, 10) : index * step;
+              el.style.setProperty('--reveal-delay', `${d}ms`);
+              el.classList.add('lz-in');
+            });
+            groupIo.unobserve(group);
           });
         },
-        { rootMargin: '0px 0px -6% 0px', threshold: 0.06 }
+        { rootMargin: '0px 0px -40px 0px', threshold: 0.08 }
       );
-      els.forEach((el) => io.observe(el));
+      groups.forEach((g) => groupIo.observe(g));
+
+      // Standalone Observer: triggers individual elements outside any group
+      const standaloneEls = allRevealEls.filter((el) => !el.closest('[data-reveal-group]'));
+      const soloIo = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target as HTMLElement;
+            if (!el.classList.contains('lz-in')) {
+              el.classList.add('lz-in');
+            }
+            soloIo.unobserve(el);
+          });
+        },
+        { rootMargin: '0px 0px -40px 0px', threshold: 0.08 }
+      );
+      standaloneEls.forEach((el) => soloIo.observe(el));
     }
 
     // 2. Animated counters
@@ -97,7 +109,7 @@ export default function LandingPage() {
       const target = parseFloat(raw);
       const start = performance.now();
       const step = (now: number) => {
-        const t = Math.min(1, (now - start) / 1500);
+        const t = Math.min(1, (now - start) / 1200);
         const e = 1 - Math.pow(1 - t, 3);
         el.textContent = fmt(target * (0.62 + 0.38 * e));
         if (t < 1) requestAnimationFrame(step);
@@ -106,6 +118,9 @@ export default function LandingPage() {
           const tick = () => {
             v += 1 + Math.floor(Math.random() * 3);
             el.textContent = fmt(v);
+            el.classList.remove('lz-count-ticked');
+            void el.offsetWidth;
+            el.classList.add('lz-count-ticked');
             liveTimer = setTimeout(tick, 1600 + Math.random() * 2200);
           };
           liveTimer = setTimeout(tick, 2200);
@@ -127,25 +142,8 @@ export default function LandingPage() {
     );
     Array.from(document.querySelectorAll<HTMLElement>('[data-count]')).forEach((el) => countIo.observe(el));
 
-    // 3. Card hover effect
-    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-card]'));
-    const handleEnter = (e: MouseEvent) => {
-      (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
-    };
-    const handleLeave = (e: MouseEvent) => {
-      (e.currentTarget as HTMLElement).style.transform = 'none';
-    };
-    cards.forEach((el) => {
-      el.addEventListener('mouseenter', handleEnter);
-      el.addEventListener('mouseleave', handleLeave);
-    });
-
     return () => {
       clearTimeout(liveTimer);
-      cards.forEach((el) => {
-        el.removeEventListener('mouseenter', handleEnter);
-        el.removeEventListener('mouseleave', handleLeave);
-      });
     };
   }, []);
 
@@ -158,7 +156,7 @@ export default function LandingPage() {
 
 <Navbar />
 
-<section id="top" style={{ padding: "clamp(32px,4vw,64px) clamp(18px,4vw,48px) clamp(20px,2.2vw,32px)" }}>
+<section id="top" data-reveal-group="" data-reveal-step="75" style={{ padding: "var(--lz-hero-pt, clamp(32px,4vw,64px)) clamp(18px,4vw,48px) clamp(20px,2.2vw,32px)" }}>
   <div style={{ maxWidth: "1040px", margin: "0 auto", textAlign: "center" }}>
     <h1 data-reveal="1" style={{ margin: "0", fontSize: "clamp(42px,6.2vw,88px)", fontWeight: "500", letterSpacing: "-.045em", lineHeight: ".97", textWrap: "balance" }}>Demos are easy.<br /><span style={{ color: "#A2A29C" }}>Production is the job.</span></h1>
     <p data-reveal="1" style={{ margin: "clamp(20px,2.2vw,28px) auto 0", maxWidth: "34em", fontSize: "clamp(17px,1.3vw,20px)", color: "#5C5C58", letterSpacing: "-.012em", textWrap: "pretty" }}>Lyzr is the layer between a working agent and a governed one &mdash; registry, policy, simulation, observability and guardrails, running inside your own cloud.</p>
@@ -178,22 +176,22 @@ export default function LandingPage() {
   </div>
 </div>
 
-<section style={{ padding: "0 clamp(18px,4vw,48px) clamp(66px,8vw,116px)" }}>
+<section data-reveal-group="" data-reveal-step="65" style={{ padding: "0 clamp(18px,4vw,48px) clamp(66px,8vw,116px)" }}>
   
     <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "var(--lz-tint,#FBF3EF)", border: "1px solid #F0E1D9", borderRadius: "var(--radius-xl)", padding: "clamp(20px,2.2vw,30px) clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,3vw,44px)" }}>
-      <div style={{ flex: "1 1 152px" }}>
+      <div data-reveal="1" style={{ flex: "1 1 152px" }}>
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}>agents in production</div>
         <div data-count="1047" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px" }}>1,047</div>
       </div>
-      <div style={{ flex: "1 1 152px" }}>
+      <div data-reveal="1" style={{ flex: "1 1 152px" }}>
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}>policy checks today</div>
         <div data-count="482193" data-live="1" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px" }}>482,193</div>
       </div>
-      <div style={{ flex: "1 1 152px" }}>
+      <div data-reveal="1" style={{ flex: "1 1 152px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" /></svg>unsafe outputs stopped</div>
         <div data-count="3204" data-live="1" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px", color: "var(--lz-accent,#C1502E)" }}>3,204</div>
       </div>
-      <div style={{ flex: "1 1 152px" }}>
+      <div data-reveal="1" style={{ flex: "1 1 152px" }}>
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}>uptime, all deployments</div>
         <div style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px" }}>99.9%</div>
       </div>
@@ -211,10 +209,11 @@ export default function LandingPage() {
 
     <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(14px,1.6vw,20px)" }}>
 
-      <div data-reveal="1" className="lz-brand-wall">
+      <div data-reveal-group="" data-reveal-step="48" className="lz-brand-wall">
         {BRAND_TILES.map((brand) => (
           <div
             key={brand.name}
+            data-reveal="1"
             data-squircle=""
             className="lz-brand-card"
           >
@@ -272,10 +271,10 @@ export default function LandingPage() {
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "22em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Registry, policy, traces, guardrails, cost.<br /><span data-dim="1">Every one of them, without a rewrite.</span></h2>
 
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
+    <div data-reveal-group="" data-reveal-step="75" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
 
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Register the agents you didn&apos;t build. <span data-dim="1">Nothing gets rewritten.</span></h3>
           <a href="#cta" aria-label="Explore the registry" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -292,7 +291,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Policy runs before the model does. <span data-dim="1">Every call, every time.</span></h3>
           <a href="#cta" aria-label="Explore policy" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -320,7 +319,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>See every step an agent took. <span data-dim="1">Down to the token.</span></h3>
           <a href="#cta" aria-label="Explore traces" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -342,7 +341,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Rehearse before you ship. <span data-dim="1">Fifty thousand times.</span></h3>
           <a href="#cta" aria-label="Explore the simulation engine" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -374,7 +373,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Know what each agent costs. <span data-dim="1">And what it sent back.</span></h3>
           <a href="#cta" aria-label="Explore cost controls" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -398,7 +397,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Or start from one already running. <span data-dim="1">A hundred of them.</span></h3>
           <a href="#cta" aria-label="Explore blueprints" data-squircle="" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
@@ -417,11 +416,11 @@ export default function LandingPage() {
   </div>
 </section>
 
-<section id="sprawl" className="lz-sprawl-section" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
+<section id="sprawl" className="lz-sprawl-section" data-reveal-group="" data-reveal-step="70" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto", textAlign: "center" }}>
     <h2 data-reveal="1" style={{ margin: "0 auto", maxWidth: "20em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Six tools. One agent.<br /><span style={{ color: "#A2A29C" }}>Nobody accountable.</span></h2>
     <p data-reveal="1" style={{ margin: "18px auto 0", maxWidth: "33em", fontSize: "clamp(16px,1.2vw,19px)", color: "#5C5C58", letterSpacing: "-.012em" }}>This is what taking a single agent to production looks like without a control plane.</p>
-    <div style={{ margin: "clamp(30px,3.6vw,52px) auto 0" }}>
+    <div data-reveal="1" style={{ margin: "clamp(30px,3.6vw,52px) auto 0" }}>
       <ToolSprawl />
     </div>
     <p data-reveal="1" style={{ margin: "16px auto 0", fontSize: "11.5px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#B8B8B2" }}>six systems · four owners · no audit trail</p>
@@ -430,15 +429,15 @@ export default function LandingPage() {
 
 <section id="sovereign" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "clamp(28px,4vw,72px)", alignItems: "center" }}>
-    <div data-reveal="1" style={{ flex: "1 1 340px", minWidth: "0" }}>
-      <h2 style={{ margin: "0", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Your cloud. Your models.<br /><span style={{ color: "#A2A29C" }}>Your IP.</span></h2>
-      <p style={{ margin: "22px 0 0", maxWidth: "28em", fontSize: "clamp(16px,1.2vw,19px)", color: "#5C5C58", letterSpacing: "-.012em" }}>Lyzr deploys inside your environment. Prompts, traces and customer data never cross the boundary, and the agents you build stay yours to take anywhere.</p>
+    <div data-reveal-group="" data-reveal-step="65" style={{ flex: "1 1 340px", minWidth: "0" }}>
+      <h2 data-reveal="1" style={{ margin: "0", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Your cloud. Your models.<br /><span style={{ color: "#A2A29C" }}>Your IP.</span></h2>
+      <p data-reveal="1" style={{ margin: "22px 0 0", maxWidth: "28em", fontSize: "clamp(16px,1.2vw,19px)", color: "#5C5C58", letterSpacing: "-.012em" }}>Lyzr deploys inside your environment. Prompts, traces and customer data never cross the boundary, and the agents you build stay yours to take anywhere.</p>
       <div style={{ marginTop: "26px", maxWidth: "30em" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Runs in</span><span style={{ letterSpacing: "-.01em" }}>VPC, private cloud or air-gapped</span></div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Models</span><span style={{ letterSpacing: "-.01em" }}>Any provider, swappable</span></div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", borderBottom: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Certified</span><span style={{ letterSpacing: "-.01em" }}>SOC 2 Type II · ISO 27001 · HIPAA · GDPR</span></div>
+        <div data-reveal="1" style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Runs in</span><span style={{ letterSpacing: "-.01em" }}>VPC, private cloud or air-gapped</span></div>
+        <div data-reveal="1" style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Models</span><span style={{ letterSpacing: "-.01em" }}>Any provider, swappable</span></div>
+        <div data-reveal="1" style={{ display: "flex", justifyContent: "space-between", gap: "16px", padding: "13px 0", borderTop: "1px solid #EAEAE5", borderBottom: "1px solid #EAEAE5", fontSize: "14.5px" }}><span style={{ color: "#5C5C58" }}>Certified</span><span style={{ letterSpacing: "-.01em" }}>SOC 2 Type II · ISO 27001 · HIPAA · GDPR</span></div>
       </div>
-      <a href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "24px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>Read the security brief <span>→</span></a>
+      <a data-reveal="1" href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "24px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>Read the security brief <span>→</span></a>
     </div>
     <div data-reveal="1" data-squircle="" style={{ flex: "1 1 400px", minWidth: "0", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.6vw,36px)" }}>
       {/* Switch Tabs between VPC and Optimus */}
@@ -457,7 +456,7 @@ export default function LandingPage() {
             background: sovereignTab === "vpc" ? "#fff" : "transparent",
             color: sovereignTab === "vpc" ? "var(--lz-accent,#C1502E)" : "#63635D",
             cursor: "pointer",
-            transition: "all .2s ease",
+            transition: "color 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 160ms var(--ease-out)",
           }}
         >
           Cloud VPC
@@ -476,78 +475,80 @@ export default function LandingPage() {
             background: sovereignTab === "optimus" ? "#fff" : "transparent",
             color: sovereignTab === "optimus" ? "var(--lz-accent,#C1502E)" : "#63635D",
             cursor: "pointer",
-            transition: "all .2s ease",
+            transition: "color 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 160ms var(--ease-out)",
           }}
         >
           Optimus Appliance
         </button>
       </div>
 
-      {sovereignTab === "vpc" ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div data-squircle="" style={{ width: "100%", maxWidth: "340px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-md, 10px)", padding: "15px 16px", display: "flex", alignItems: "center", gap: "11px", animation: "lzDrift 7s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}>
-            <img src="/assets/lyzr-wordmark-light.png" alt="Lyzr" width="441" height="170" loading="lazy" decoding="async" style={{ display: "block", height: "15px", width: "auto", filter: "invert(1)" }} />
-            <span style={{ fontSize: "14px", fontWeight: "500", letterSpacing: "-.015em" }}>control plane</span>
-            <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>policy · audit</span>
-          </div>
-          <div style={{ height: "58px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-            <span style={{ width: "1px", flex: "1", background: "repeating-linear-gradient(180deg,#D6D6D0 0 4px,transparent 4px 9px)" }}></span>
-            <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)", whiteSpace: "nowrap" }}>control only · no data</span>
-            <span style={{ width: "1px", flex: "1", background: "repeating-linear-gradient(180deg,#D6D6D0 0 4px,transparent 4px 9px)" }}></span>
-          </div>
-          <div data-squircle="" style={{ width: "100%", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-lg, 14px)", padding: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingBottom: "14px" }}><span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>your vpc</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#BDBDB7" }}>aws · us-east-1</span></div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(90px,1fr))", gap: "8px" }}>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "#FCFCFB" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Agents</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#A8A8A2", marginTop: "3px" }}>running</div></div>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "#FCFCFB" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Models</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#A8A8A2", marginTop: "3px" }}>yours</div></div>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "var(--lz-tint,#FBF3EF)" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Data</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "var(--lz-ink2,#B08574)", marginTop: "3px" }}>stays put</div></div>
+      <div key={sovereignTab} style={{ animation: "lzTabIn 220ms var(--ease-out) forwards" }}>
+        {sovereignTab === "vpc" ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div data-squircle="" style={{ width: "100%", maxWidth: "340px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-md, 10px)", padding: "15px 16px", display: "flex", alignItems: "center", gap: "11px", animation: "lzDrift 7s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}>
+              <img src="/assets/lyzr-wordmark-light.png" alt="Lyzr" width="441" height="170" loading="lazy" decoding="async" style={{ display: "block", height: "15px", width: "auto", filter: "invert(1)" }} />
+              <span style={{ fontSize: "14px", fontWeight: "500", letterSpacing: "-.015em" }}>control plane</span>
+              <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>policy · audit</span>
             </div>
-            <div style={{ marginTop: "12px", height: "5px", borderRadius: "3px", background: "#F1F1ED", overflow: "hidden" }}><span style={{ display: "block", height: "100%", width: "100%", background: "var(--lz-accent,#C1502E)", transformOrigin: "left", animation: "lzBar 5.5s cubic-bezier(.4,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span></div>
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-          <div data-squircle="" style={{ position: "relative", width: "100%", maxWidth: "340px", background: "#0B0B0B", borderRadius: "var(--radius-lg, 14px)", padding: "18px 20px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid #222" }}>
-            <div style={{ width: "100%", height: "170px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <picture>
-                <source srcSet="/assets/optimus.webp" type="image/webp" />
-                <img
-                  src="/assets/optimus.png"
-                  alt="Lyzr Optimus sovereign AI private agent appliance"
-                  width="340"
-                  height="267"
-                  loading="lazy"
-                  decoding="async"
-                  style={{ maxHeight: "160px", width: "auto", objectFit: "contain", display: "block" }}
-                />
-              </picture>
+            <div style={{ height: "58px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <span style={{ width: "1px", flex: "1", background: "repeating-linear-gradient(180deg,#D6D6D0 0 4px,transparent 4px 9px)" }}></span>
+              <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)", whiteSpace: "nowrap" }}>control only · no data</span>
+              <span style={{ width: "1px", flex: "1", background: "repeating-linear-gradient(180deg,#D6D6D0 0 4px,transparent 4px 9px)" }}></span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #222" }}>
-              <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#8E8E88" }}>Optimus-1 Node</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#61A87D" }}>
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#61A87D" }} />
-                AIR-GAPPED · 0% EGRESS
-              </span>
-            </div>
-          </div>
-          <div data-squircle="" style={{ width: "100%", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-lg, 14px)", padding: "14px 16px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(80px,1fr))", gap: "8px" }}>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "#FCFCFB" }}>
-                <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Hardware</div>
-                <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2", marginTop: "2px" }}>Dedicated</div>
+            <div data-squircle="" style={{ width: "100%", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-lg, 14px)", padding: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingBottom: "14px" }}><span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>your vpc</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#BDBDB7" }}>aws · us-east-1</span></div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(90px,1fr))", gap: "8px" }}>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "#FCFCFB" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Agents</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#A8A8A2", marginTop: "3px" }}>running</div></div>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "#FCFCFB" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Models</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#A8A8A2", marginTop: "3px" }}>yours</div></div>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "13px 10px", textAlign: "center", background: "var(--lz-tint,#FBF3EF)" }}><div style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Data</div><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "var(--lz-ink2,#B08574)", marginTop: "3px" }}>stays put</div></div>
               </div>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "#FCFCFB" }}>
-                <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Weights</div>
-                <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2", marginTop: "2px" }}>Local</div>
+              <div style={{ marginTop: "12px", height: "5px", borderRadius: "3px", background: "#F1F1ED", overflow: "hidden" }}><span style={{ display: "block", height: "100%", width: "100%", background: "var(--lz-accent,#C1502E)", transformOrigin: "left", animation: "lzBar 5.5s cubic-bezier(.4,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span></div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+            <div data-squircle="" style={{ position: "relative", width: "100%", maxWidth: "340px", background: "#0B0B0B", borderRadius: "var(--radius-lg, 14px)", padding: "18px 20px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid #222" }}>
+              <div style={{ width: "100%", height: "170px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <picture>
+                  <source srcSet="/assets/optimus.webp" type="image/webp" />
+                  <img
+                    src="/assets/optimus.png"
+                    alt="Lyzr Optimus sovereign AI private agent appliance"
+                    width="340"
+                    height="267"
+                    loading="lazy"
+                    decoding="async"
+                    style={{ maxHeight: "160px", width: "auto", objectFit: "contain", display: "block" }}
+                  />
+                </picture>
               </div>
-              <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "var(--lz-tint,#FBF3EF)" }}>
-                <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Network</div>
-                <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "var(--lz-ink2,#B08574)", marginTop: "2px" }}>Air-gapped</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #222" }}>
+                <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#8E8E88" }}>Optimus-1 Node</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#61A87D" }}>
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#61A87D" }} />
+                  AIR-GAPPED · 0% EGRESS
+                </span>
               </div>
             </div>
+            <div data-squircle="" style={{ width: "100%", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "var(--radius-lg, 14px)", padding: "14px 16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(80px,1fr))", gap: "8px" }}>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "#FCFCFB" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Hardware</div>
+                  <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2", marginTop: "2px" }}>Dedicated</div>
+                </div>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "#FCFCFB" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Weights</div>
+                  <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2", marginTop: "2px" }}>Local</div>
+                </div>
+                <div data-squircle="" style={{ border: "1px solid #EFEFEB", borderRadius: "var(--radius-md, 10px)", padding: "11px 8px", textAlign: "center", background: "var(--lz-tint,#FBF3EF)" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "500", letterSpacing: "-.01em" }}>Network</div>
+                  <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "var(--lz-ink2,#B08574)", marginTop: "2px" }}>Air-gapped</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   </div>
 </section>
@@ -560,22 +561,22 @@ export default function LandingPage() {
         <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,.82)" }}>airasia move · customer operations</span>
       </div>
     </div>
-    <div data-reveal="1" style={{ flex: "1 1 330px", minWidth: "0" }}>
-      <h2 style={{ margin: "0", fontSize: "clamp(26px,2.6vw,40px)", fontWeight: "500", letterSpacing: "-.032em", lineHeight: "1.08" }}>Response time down 95%. <span style={{ color: "#A2A29C" }}>Across every market they fly.</span></h2>
-      <p style={{ margin: "24px 0 0", fontSize: "clamp(16px,1.2vw,19px)", color: "#3D3D39", letterSpacing: "-.012em", maxWidth: "27em" }}>“We stopped managing tickets and started managing outcomes. The agents absorb the volume, and we can still show an auditor exactly what happened on any single case.”</p>
-      <div style={{ marginTop: "24px", paddingTop: "18px", borderTop: "1px solid #EAEAE5" }}>
+    <div data-reveal-group="" data-reveal-step="75" style={{ flex: "1 1 330px", minWidth: "0" }}>
+      <h2 data-reveal="1" style={{ margin: "0", fontSize: "clamp(26px,2.6vw,40px)", fontWeight: "500", letterSpacing: "-.032em", lineHeight: "1.08" }}>Response time down 95%. <span style={{ color: "#A2A29C" }}>Across every market they fly.</span></h2>
+      <p data-reveal="1" style={{ margin: "24px 0 0", fontSize: "clamp(16px,1.2vw,19px)", color: "#3D3D39", letterSpacing: "-.012em", maxWidth: "27em" }}>“We stopped managing tickets and started managing outcomes. The agents absorb the volume, and we can still show an auditor exactly what happened on any single case.”</p>
+      <div data-reveal="1" style={{ marginTop: "24px", paddingTop: "18px", borderTop: "1px solid #EAEAE5" }}>
         <div style={{ fontSize: "15px", fontWeight: "500", letterSpacing: "-.012em" }}>Head of Customer Operations</div>
         <div style={{ fontSize: "14.5px", color: "#8E8E88" }}>AirAsia MOVE</div>
       </div>
-      <a href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "20px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>All customer stories <span>→</span></a>
+      <a data-reveal="1" href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "20px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>All customer stories <span>→</span></a>
     </div>
   </div>
 </section>
 
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
-  <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,2.2vw,32px)", alignItems: "stretch" }}>
+  <div data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,2.2vw,32px)", alignItems: "stretch" }}>
 
-    <div style={{ flex: "1 1 250px", minWidth: "0", maxWidth: "340px", display: "flex", flexDirection: "column", gap: "12px" }}>
+    <div data-reveal="1" style={{ flex: "1 1 250px", minWidth: "0", maxWidth: "340px", display: "flex", flexDirection: "column", gap: "12px" }}>
       <div data-squircle="" style={{ borderRadius: "var(--radius-lg, 14px)", overflow: "hidden", background: "#E9E9E4", flex: "1 1 auto" }}>
         <ImageSlot id="lz-founder" shape="rect" placeholder="Founder portrait — Siva Surendira (lyzr.ai)" style={{ width: "100%", height: "auto", aspectRatio: "4/5" }} src="/assets/founder-siva.webp" />
       </div>
@@ -586,14 +587,14 @@ export default function LandingPage() {
       </div>
     </div>
 
-    <div data-squircle="" style={{ flex: "1.7 1 400px", minWidth: "0", background: "#fff", border: "1px solid #EDEDE8", borderRadius: "var(--radius-lg, 14px)", padding: "clamp(24px,2.8vw,44px)", boxShadow: "0 1px 0 #F1F1EC,0 22px 44px -32px rgba(0,0,0,.2)", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <div data-reveal-group="" data-reveal-step="75" data-squircle="" style={{ flex: "1.7 1 400px", minWidth: "0", background: "#fff", border: "1px solid #EDEDE8", borderRadius: "var(--radius-lg, 14px)", padding: "clamp(24px,2.8vw,44px)", boxShadow: "0 1px 0 #F1F1EC,0 22px 44px -32px rgba(0,0,0,.2)", display: "flex", flexDirection: "column" }}>
+      <div data-reveal="1" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <span style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)" }}>a note from the founder</span>
         <span style={{ flex: "1", height: "1px", background: "var(--lz-hair,#EFE1DB)" }}></span>
       </div>
-      <p style={{ margin: "clamp(20px,2.2vw,28px) 0 0", fontSize: "clamp(18px,1.7vw,26px)", lineHeight: "1.42", letterSpacing: "-.022em", color: "#1A1A18", maxWidth: "26em" }}>Most agent platforms sell you tools and leave your team to work out the rest. We think building an agent is the easy part now — productionisation is where the real work starts.</p>
-      <p style={{ margin: "clamp(14px,1.4vw,20px) 0 0", fontSize: "clamp(15px,1.15vw,17.5px)", lineHeight: "1.62", color: "#5C5C58", letterSpacing: "-.012em", maxWidth: "32em" }}>So we operate like Palantir for the agent era: platform and people together, our engineers deep in your data, staying until the thing is live and governed. That is the whole company.</p>
-      <div style={{ marginTop: "auto", paddingTop: "clamp(24px,2.6vw,36px)" }}>
+      <p data-reveal="1" style={{ margin: "clamp(20px,2.2vw,28px) 0 0", fontSize: "clamp(18px,1.7vw,26px)", lineHeight: "1.42", letterSpacing: "-.022em", color: "#1A1A18", maxWidth: "26em" }}>Most agent platforms sell you tools and leave your team to work out the rest. We think building an agent is the easy part now — productionisation is where the real work starts.</p>
+      <p data-reveal="1" style={{ margin: "clamp(14px,1.4vw,20px) 0 0", fontSize: "clamp(15px,1.15vw,17.5px)", lineHeight: "1.62", color: "#5C5C58", letterSpacing: "-.012em", maxWidth: "32em" }}>So we operate like Palantir for the agent era: platform and people together, our engineers deep in your data, staying until the thing is live and governed. That is the whole company.</p>
+      <div data-reveal="1" style={{ marginTop: "auto", paddingTop: "clamp(24px,2.6vw,36px)" }}>
         <div style={{ height: "1px", background: "#EDEDE8", marginBottom: "16px" }}></div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center" }}>
           <span style={{ width: "3px", height: "34px", borderRadius: "2px", background: "var(--lz-accent,#C1502E)", flex: "none" }}></span>
@@ -612,31 +613,31 @@ export default function LandingPage() {
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(28px,3vw,44px)", maxWidth: "24em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>A platform, and the engineers who ship it. <span style={{ color: "#A2A29C" }}>Eight weeks, typically.</span></h2>
-    <div data-reveal="1" data-squircle="" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(24px,2.8vw,44px)" }}>
+    <div data-squircle="" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(24px,2.8vw,44px)" }}>
       <div style={{ position: "relative", height: "2px", background: "#E4E4DF", borderRadius: "2px", margin: "0 0 30px" }}><span style={{ position: "absolute", inset: "0", background: "var(--lz-accent,#C1502E)", borderRadius: "2px", transformOrigin: "left", animation: "lzBar 10s cubic-bezier(.4,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span></div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,190px),1fr))", gap: "clamp(18px,2.2vw,34px)" }}>
-        <div>
+      <div data-reveal-group="" data-reveal-step="70" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,190px),1fr))", gap: "clamp(18px,2.2vw,34px)" }}>
+        <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>week 1</div>
           <div style={{ fontSize: "clamp(17px,1.3vw,21px)", fontWeight: "500", letterSpacing: "-.02em", marginTop: "9px", lineHeight: "1.25" }}>Pick the use case</div>
           <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Applied AI architects sit with your team and choose the workflow worth automating.</p>
         </div>
-        <div>
+        <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>week 2–4</div>
           <div style={{ fontSize: "clamp(17px,1.3vw,21px)", fontWeight: "500", letterSpacing: "-.02em", marginTop: "9px", lineHeight: "1.25" }}>Co-build it</div>
           <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Your engineers and ours build in the same workspace, inside your environment.</p>
         </div>
-        <div>
+        <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2" }}>week 5–7</div>
           <div style={{ fontSize: "clamp(17px,1.3vw,21px)", fontWeight: "500", letterSpacing: "-.02em", marginTop: "9px", lineHeight: "1.25" }}>Harden it</div>
           <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Simulation, policy, guardrails and sign-off — the part most projects skip.</p>
         </div>
-        <div>
+        <div data-reveal="1">
           <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)" }}>week 8</div>
           <div style={{ fontSize: "clamp(17px,1.3vw,21px)", fontWeight: "500", letterSpacing: "-.02em", marginTop: "9px", lineHeight: "1.25" }}>You own it</div>
           <p style={{ margin: "8px 0 0", fontSize: "14.5px", color: "#6E6E68", letterSpacing: "-.008em" }}>Live in production, handed over with the IP and the roadmap.</p>
         </div>
       </div>
-      <div style={{ marginTop: "clamp(26px,3vw,40px)", paddingTop: "22px", borderTop: "1px solid #E4E4DF", display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center", justifyContent: "space-between" }}>
+      <div data-reveal="1" style={{ marginTop: "clamp(26px,3vw,40px)", paddingTop: "22px", borderTop: "1px solid #E4E4DF", display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center", justifyContent: "space-between" }}>
         <p style={{ margin: "0", fontSize: "15px", color: "#6E6E68", letterSpacing: "-.008em", maxWidth: "38em" }}>Prefer to move alone, or through a partner? Both work — 100+ partners deliver on Lyzr across BFSI, healthcare and telco.</p>
         <a href="#cta" data-squircle="" style={{ fontSize: "15px", fontWeight: "500", padding: "12px 20px", borderRadius: "var(--radius-md, 10px)", background: "#fff", border: "1px solid #DEDED9", whiteSpace: "nowrap" }}>Find a partner</a>
       </div>
@@ -647,7 +648,7 @@ export default function LandingPage() {
 <section id="resources" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(28px,3vw,44px)", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Take something with you.</h2>
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
+    <div data-reveal-group="" data-reveal-step="85" style={{ display: "flex", flexWrap: "wrap", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
       <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", display: "flex", flexDirection: "column", gap: "clamp(10px,1vw,14px)" }}>
         <div data-squircle="" data-res-media="" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", background: "#F4F4F1", borderRadius: "var(--radius-xl)", overflow: "hidden" }}>
           <ImageSlot
@@ -663,7 +664,6 @@ export default function LandingPage() {
               aspectRatio: "1 / 2",
               top: "calc(clamp(14px,1.8vw,22px) - 15.2%)",
               left: "50%",
-              transform: "translateX(-50%)",
             }}
           />
         </div>
@@ -687,7 +687,6 @@ export default function LandingPage() {
               aspectRatio: "1 / 2",
               top: "calc(clamp(14px,1.8vw,22px) - 15.2%)",
               left: "50%",
-              transform: "translateX(-50%)",
             }}
           />
         </div>
@@ -711,7 +710,6 @@ export default function LandingPage() {
               aspectRatio: "1 / 2",
               top: "calc(clamp(14px,1.8vw,22px) - 15.2%)",
               left: "50%",
-              transform: "translateX(-50%)",
             }}
           />
         </div>
@@ -728,7 +726,7 @@ export default function LandingPage() {
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "22em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Start where you already are.<br /><span data-dim="1">Three ways in, one control plane.</span></h2>
 
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,300px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
+    <div data-reveal-group="" data-reveal-step="85" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,300px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
 
       <div data-reveal="1" data-squircle="" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "var(--radius-xl)", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(18px,2vw,26px)" }}>
         <div>
@@ -774,11 +772,11 @@ export default function LandingPage() {
 </section>
 
 <section id="cta" style={{ padding: "0 clamp(18px,4vw,48px) clamp(70px,8vw,120px)" }}>
-  <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#0B0B0B", borderRadius: "var(--radius-2xl)", padding: "clamp(48px,7vw,116px) clamp(24px,4vw,64px)", textAlign: "center", position: "relative", overflow: "hidden" }}>
+  <div data-reveal-group="" data-reveal-step="80" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#0B0B0B", borderRadius: "var(--radius-2xl)", padding: "clamp(48px,7vw,116px) clamp(24px,4vw,64px)", textAlign: "center", position: "relative", overflow: "hidden" }}>
     <div style={{ position: "absolute", left: "50%", top: "0", width: "min(760px,110%)", height: "100%", transform: "translateX(-50%)", background: "radial-gradient(60% 55% at 50% 0%,var(--lz-glow,rgba(193,80,46,.4)),transparent 70%)", pointerEvents: "none" }}></div>
     <div style={{ position: "relative" }}>
-      <h2 style={{ margin: "0 auto", maxWidth: "18em", fontSize: "clamp(32px,4.4vw,70px)", fontWeight: "500", letterSpacing: "-.04em", lineHeight: "1.02", color: "#fff" }}>Bring a use case.<br /><span style={{ color: "var(--lz-lite,#E08A67)" }}>Leave with an agent in production.</span></h2>
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "clamp(30px,3.4vw,44px)" }}>
+      <h2 data-reveal="1" style={{ margin: "0 auto", maxWidth: "18em", fontSize: "clamp(32px,4.4vw,70px)", fontWeight: "500", letterSpacing: "-.04em", lineHeight: "1.02", color: "#fff" }}>Bring a use case.<br /><span style={{ color: "var(--lz-lite,#E08A67)" }}>Leave with an agent in production.</span></h2>
+      <div data-reveal="1" style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "clamp(30px,3.4vw,44px)" }}>
         <a href="#top" data-squircle="" style={{ fontSize: "16px", fontWeight: "500", padding: "15px 26px", borderRadius: "var(--radius-md, 10px)", background: "var(--lz-accent,#C1502E)", color: "#fff" }}>Talk to us</a>
         <a href="#top" data-squircle="" style={{ fontSize: "16px", fontWeight: "500", padding: "15px 26px", borderRadius: "var(--radius-md, 10px)", border: "1px solid rgba(255,255,255,.24)", color: "#fff" }}>Open Agent Studio</a>
       </div>
@@ -786,9 +784,9 @@ export default function LandingPage() {
   </div>
 </section>
 
-<footer style={{ borderTop: "1px solid #EBEBE7", padding: "clamp(48px,5vw,76px) clamp(18px,4vw,48px) clamp(32px,3vw,44px)", background: "#FAFAF8" }}>
+<footer data-reveal-group="" data-reveal-step="55" style={{ borderTop: "1px solid #EBEBE7", padding: "clamp(48px,5vw,76px) clamp(18px,4vw,48px) clamp(32px,3vw,44px)", background: "#FAFAF8" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "clamp(28px,4vw,64px)" }}>
-    <div style={{ flex: "1 1 240px", minWidth: "0" }}>
+    <div data-reveal="1" style={{ flex: "1 1 240px", minWidth: "0" }}>
       <a href="#top" aria-label="Lyzr" style={{ display: "inline-flex" }}><img src="/assets/lyzr-wordmark-light.png" alt="Lyzr" width="441" height="170" loading="lazy" decoding="async" style={{ display: "block", height: "27px", width: "auto", filter: "invert(1)" }} /></a>
       <p style={{ margin: "18px 0 0", fontSize: "14px", color: "#8E8E88", letterSpacing: "-.008em", maxWidth: "22em" }}>525 Washington Blvd, 2410<br />Jersey City, NJ 07310, USA</p>
       <div style={{ marginTop: "22px", display: "flex", gap: "8px", maxWidth: "300px" }}>
@@ -798,28 +796,29 @@ export default function LandingPage() {
       <p style={{ margin: "11px 0 0", fontSize: "13px", color: "#A8A8A2" }}>Field notes on agents in production. Twice a month.</p>
     </div>
     <div style={{ flex: "2 1 420px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: "clamp(20px,2.4vw,34px)" }}>
-      <div>
+      <div data-reveal="1">
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "15px" }}>platform</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "9px", fontSize: "14.5px" }}><a href="#platform" style={{ color: "#3D3D39" }}>Control plane</a><a href="#build" style={{ color: "#3D3D39" }}>Agent Studio</a><a href="#build" style={{ color: "#3D3D39" }}>Architect</a><a href="#platform" style={{ color: "#3D3D39" }}>Blueprints</a><a href="#sovereign" style={{ color: "#3D3D39" }}>Responsible AI</a></div>
       </div>
-      <div>
+      <div data-reveal="1">
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "15px" }}>solutions</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "9px", fontSize: "14.5px" }}><a href="#customers" style={{ color: "#3D3D39" }}>Banking</a><a href="#customers" style={{ color: "#3D3D39" }}>Insurance</a><a href="#customers" style={{ color: "#3D3D39" }}>Customer service</a><a href="#customers" style={{ color: "#3D3D39" }}>HR</a><a href="#customers" style={{ color: "#3D3D39" }}>Marketing</a></div>
       </div>
-      <div>
+      <div data-reveal="1">
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "15px" }}>agents</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "9px", fontSize: "14.5px" }}><a href="#platform" style={{ color: "#3D3D39" }}>Jazon · SDR</a><a href="#platform" style={{ color: "#3D3D39" }}>Skott · Marketer</a><a href="#platform" style={{ color: "#3D3D39" }}>Diane · HR</a><a href="#platform" style={{ color: "#3D3D39" }}>Dwight · RFP</a><a href="#platform" style={{ color: "#3D3D39" }}>Jeff · Support</a></div>
       </div>
-      <div>
+      <div data-reveal="1">
         <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: ".08em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "15px" }}>company</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "9px", fontSize: "14.5px" }}><a href="#customers" style={{ color: "#3D3D39" }}>About</a><a href="#resources" style={{ color: "#3D3D39" }}>News</a><a href="#cta" style={{ color: "#3D3D39" }}>Careers</a><a href="#cta" style={{ color: "#3D3D39" }}>Pricing</a><a href="#cta" style={{ color: "#3D3D39" }}>Contact</a></div>
       </div>
     </div>
   </div>
-  <div style={{ maxWidth: "1280px", margin: "clamp(36px,4vw,56px) auto 0", paddingTop: "22px", borderTop: "1px solid #EBEBE7", display: "flex", flexWrap: "wrap", gap: "14px", justifyContent: "space-between", fontSize: "13px", color: "#A8A8A2" }}>
+  <div data-reveal="1" style={{ maxWidth: "1280px", margin: "clamp(36px,4vw,56px) auto 0", paddingTop: "22px", borderTop: "1px solid #EBEBE7", display: "flex", flexWrap: "wrap", gap: "14px", justifyContent: "space-between", fontSize: "13px", color: "#A8A8A2" }}>
     <span>© 2026 Lyzr AI. All rights reserved.</span>
     <span style={{ display: "flex", gap: "18px", flexWrap: "wrap" }}><a href="#top" style={{ color: "#A8A8A2" }}>Privacy</a><a href="#top" style={{ color: "#A8A8A2" }}>Terms</a><a href="#top" style={{ color: "#A8A8A2" }}>Trust centre</a></span>
   </div>
+  <FooterWordmark />
 </footer>
 
 </div>

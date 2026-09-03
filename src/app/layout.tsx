@@ -15,6 +15,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+              }
+              try {
+                var nav = performance.getEntriesByType('navigation')[0];
+                if ((nav && nav.type === 'reload') || window.location.hash === '#cta' || window.location.hash === '#top') {
+                  if (window.location.hash) {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                  }
+                  window.scrollTo(0, 0);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

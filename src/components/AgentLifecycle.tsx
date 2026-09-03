@@ -1040,7 +1040,7 @@ function usePrefersReducedMotion() {
       return () => mq.removeEventListener("change", onChange);
     },
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => true
+    () => false
   );
 }
 
@@ -1063,6 +1063,10 @@ export default function AgentLifecycle() {
 
   useEffect(() => {
     if (!animated) return;
+    // On phones (<= 768px), AgentLifecycle is hidden via CSS (.lz-desktop-platform { display: none }).
+    // Do not load GSAP ScrollTrigger on mobile to prevent ScrollTrigger's refresh/scroll-restoration
+    // handlers from interfering with the mobile page height and jumping to the bottom.
+    if (typeof window !== "undefined" && window.innerWidth <= 768) return;
 
     let mm: ReturnType<typeof gsap.matchMedia> | null = null;
     let cancelled = false;

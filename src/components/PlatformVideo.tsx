@@ -7,7 +7,6 @@ export default function PlatformVideo() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     // Ensure muted autoplay starts smoothly
@@ -26,7 +25,6 @@ export default function PlatformVideo() {
     setIsMuted(nextMuted);
     if (!nextMuted) {
       videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
     }
   };
 
@@ -41,24 +39,24 @@ export default function PlatformVideo() {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
       videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
     } else {
       videoRef.current.pause();
-      setIsPlaying(false);
     }
   };
 
   return (
-    <section className={s.section}>
+    <section className={s.section} data-reveal-group="" data-reveal-step="65">
       <div className={s.container}>
-        <h2 data-reveal="1" className={s.title}>
-          One control plane for every agent.
-          <br />
-          <span className={s.dim}>Wherever it was built. Whoever built it.</span>
-        </h2>
-        <p data-reveal="1" className={s.sub}>
-          Watch how Lyzr unifies governance, orchestration, simulation, and audit in a single workspace.
-        </p>
+        <div className={s.headingGroup}>
+          <h2 data-reveal="1" className={s.title}>
+            One control plane for every agent.
+            <br />
+            <span className={s.dim}>Wherever it was built. Whoever built it.</span>
+          </h2>
+          <p data-reveal="1" className={s.sub}>
+            Watch how Lyzr unifies governance, orchestration, simulation, and audit in a single workspace.
+          </p>
+        </div>
 
         <div className={s.frameWrapper} data-reveal="1">
           {/* Ambient backlight glow */}

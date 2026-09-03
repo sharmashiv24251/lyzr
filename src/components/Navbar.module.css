@@ -93,15 +93,21 @@
   color: #0B0B0B;
   background: #fff;
   text-decoration: none;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 160ms var(--ease-out);
   white-space: nowrap;
 }
 
-.btnSecondary:hover {
-  background: #F7F7F5;
-  border-color: #CFCFC8;
-  color: #0B0B0B;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .btnSecondary:hover {
+    background: #F7F7F5;
+    border-color: #CFCFC8;
+    color: #0B0B0B;
+    transform: translateY(-1px);
+  }
+}
+
+.btnSecondary:active {
+  transform: scale(0.97);
 }
 
 .btnPrimary {
@@ -115,16 +121,22 @@
   background: var(--lz-accent, #C1502E);
   color: #fff;
   text-decoration: none;
-  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(193, 80, 46, 0.2);
 }
 
-.btnPrimary:hover {
-  opacity: 0.94;
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(193, 80, 46, 0.28);
+@media (hover: hover) and (pointer: fine) {
+  .btnPrimary:hover {
+    opacity: 0.94;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(193, 80, 46, 0.28);
+  }
+}
+
+.btnPrimary:active {
+  transform: scale(0.97);
 }
 
 /* Mobile Controls Area */
@@ -145,13 +157,19 @@
   background: var(--lz-accent, #C1502E);
   color: #fff;
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
   white-space: nowrap;
 }
 
-.mobileQuickCta:hover {
-  opacity: 0.92;
-  color: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .mobileQuickCta:hover {
+    opacity: 0.92;
+    color: #fff;
+  }
+}
+
+.mobileQuickCta:active {
+  transform: scale(0.97);
 }
 
 /* Hamburger Toggle Button */
@@ -168,14 +186,20 @@
   border: 1px solid #E5E5E0;
   border-radius: var(--radius-md, 10px);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 160ms var(--ease-out);
   position: relative;
   z-index: 10;
 }
 
-.hamburgerBtn:hover {
-  background: #F0F0EC;
-  border-color: #D6D6CF;
+@media (hover: hover) and (pointer: fine) {
+  .hamburgerBtn:hover {
+    background: #F0F0EC;
+    border-color: #D6D6CF;
+  }
+}
+
+.hamburgerBtn:active {
+  transform: scale(0.96);
 }
 
 .hamburgerBtn:focus-visible {
@@ -188,8 +212,8 @@
   height: 2px;
   background-color: #1A1A18;
   border-radius: 2px;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.22s ease;
+  transition: transform 0.24s var(--ease-out),
+              opacity 0.2s var(--ease-out);
   transform-origin: center;
 }
 
@@ -244,7 +268,7 @@
     z-index: 90;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.24s var(--ease-out);
   }
 
   .backdropActive {
@@ -267,8 +291,8 @@
     opacity: 0;
     transform: translateY(-8px);
     pointer-events: none;
-    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.24s var(--ease-out),
+                transform 0.28s var(--ease-drawer);
     max-height: calc(100vh - 72px);
     overflow-y: auto;
   }
@@ -290,7 +314,22 @@
 
   .mobileNavItem {
     display: block;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
   }
+
+  .mobileMenuOpen .mobileNavItem {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobileMenuOpen .mobileNavItem:nth-child(1) { transition-delay: 25ms; }
+  .mobileMenuOpen .mobileNavItem:nth-child(2) { transition-delay: 50ms; }
+  .mobileMenuOpen .mobileNavItem:nth-child(3) { transition-delay: 75ms; }
+  .mobileMenuOpen .mobileNavItem:nth-child(4) { transition-delay: 100ms; }
+  .mobileMenuOpen .mobileNavItem:nth-child(5) { transition-delay: 125ms; }
+  .mobileMenuOpen .mobileNavItem:nth-child(6) { transition-delay: 150ms; }
 
   .mobileNavLink {
     display: flex;
@@ -302,24 +341,33 @@
     color: #0B0B0B;
     text-decoration: none;
     border-radius: var(--radius-md, 10px);
-    transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
   }
 
-  .mobileNavLink:hover,
+  @media (hover: hover) and (pointer: fine) {
+    .mobileNavLink:hover {
+      background: #F6F6F3;
+      color: var(--lz-accent, #C1502E);
+    }
+  }
+
   .mobileNavLink:active {
     background: #F6F6F3;
     color: var(--lz-accent, #C1502E);
+    transform: scale(0.98);
   }
 
   .mobileNavArrow {
     color: #A2A29C;
     font-size: 14px;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition: transform 160ms var(--ease-out), color 160ms var(--ease-out);
   }
 
-  .mobileNavLink:hover .mobileNavArrow {
-    transform: translateX(3px);
-    color: var(--lz-accent, #C1502E);
+  @media (hover: hover) and (pointer: fine) {
+    .mobileNavLink:hover .mobileNavArrow {
+      transform: translateX(3px);
+      color: var(--lz-accent, #C1502E);
+    }
   }
 
   .mobileDivider {
@@ -348,13 +396,20 @@
     color: #0B0B0B;
     background: #fff;
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    transition: background-color 160ms var(--ease-out), transform 160ms var(--ease-out);
   }
 
-  .mobileActionSecondary:hover,
+  @media (hover: hover) and (pointer: fine) {
+    .mobileActionSecondary:hover {
+      background: #F7F7F5;
+      color: #0B0B0B;
+    }
+  }
+
   .mobileActionSecondary:active {
     background: #F7F7F5;
     color: #0B0B0B;
+    transform: scale(0.97);
   }
 
   .mobileActionPrimary {
@@ -369,14 +424,21 @@
     background: var(--lz-accent, #C1502E);
     color: #fff;
     text-decoration: none;
-    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+    transition: opacity 160ms var(--ease-out), box-shadow 160ms var(--ease-out), transform 160ms var(--ease-out);
     box-shadow: 0 3px 12px rgba(193, 80, 46, 0.25);
   }
 
-  .mobileActionPrimary:hover,
+  @media (hover: hover) and (pointer: fine) {
+    .mobileActionPrimary:hover {
+      opacity: 0.92;
+      color: #fff;
+    }
+  }
+
   .mobileActionPrimary:active {
     opacity: 0.92;
     color: #fff;
+    transform: scale(0.97);
   }
 }
 
