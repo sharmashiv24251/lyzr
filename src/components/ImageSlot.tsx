@@ -2,7 +2,7 @@
 
 import React from "react";
 
-interface ImageSlotProps {
+interface ImageSlotProps extends React.HTMLAttributes<HTMLDivElement> {
   id?: string;
   src?: string;
   placeholder?: string;
@@ -14,6 +14,7 @@ interface ImageSlotProps {
   /* object-position for the inner image, e.g. "top" to keep the head of a
      tall artwork visible when the frame is shorter than the source. */
   position?: string;
+  priority?: boolean;
 }
 
 export default function ImageSlot({
@@ -26,19 +27,27 @@ export default function ImageSlot({
   className,
   fit = "cover",
   position,
+  priority = false,
+  ...rest
 }: ImageSlotProps) {
-  // If id is lz-founder and no src provided, default to founder-siva.png from assets
-  const resolvedSrc = src || (id === "lz-founder" ? "/assets/founder-siva.png" : undefined);
+  // If id is lz-founder and no src provided, default to founder-siva.webp from assets
+  const resolvedSrc = src || (id === "lz-founder" ? "/assets/founder-siva.webp" : undefined);
 
   let borderRadius = "";
   if (shape === "circle") borderRadius = "50%";
-  else if (shape === "pill") borderRadius = "9999px";
-  else if (shape === "rounded") borderRadius = radius ? `${radius}px` : "12px";
+  else if (shape === "pill") borderRadius = "var(--radius-full, 9999px)";
+  else if (shape === "rounded") borderRadius = radius ? (typeof radius === "number" ? `${radius}px` : radius) : "var(--radius-lg, 14px)";
+
+  // Compute WebP source and fallback if applicable
+  const webpSrc = resolvedSrc?.endsWith(".webp")
+    ? resolvedSrc
+    : resolvedSrc?.replace(/\.(png|jpg|jpeg)$/i, ".webp");
 
   return (
     <div
       id={id}
       className={className}
+      data-squircle={shape === "rounded" ? "" : undefined}
       style={{
         position: "relative",
         width: "100%",
@@ -47,21 +56,29 @@ export default function ImageSlot({
         overflow: "hidden",
         ...style,
       }}
+      {...rest}
     >
       {resolvedSrc ? (
         <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={resolvedSrc}
-            alt={placeholder || ""}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: fit,
-              objectPosition: position,
-              display: "block",
-            }}
-          />
+          <picture>
+            {webpSrc && webpSrc !== resolvedSrc && (
+              <source srcSet={webpSrc} type="image/webp" />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={resolvedSrc}
+              alt={placeholder || ""}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: fit,
+                objectPosition: position,
+                display: "block",
+              }}
+            />
+          </picture>
         </div>
       ) : (
         <div

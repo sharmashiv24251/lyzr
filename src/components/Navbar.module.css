@@ -1,0 +1,401 @@
+/* Navbar styling for Lyzr */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid #EBEBE7;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* When the mobile menu is open, make the header 100% solid white */
+.headerOpen {
+  background: #FFFFFF !important;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 14px clamp(18px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(16px, 2.4vw, 34px);
+  background: transparent;
+}
+
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  flex: none;
+  text-decoration: none;
+}
+
+.logoImage {
+  display: block;
+  height: 26px;
+  width: auto;
+  filter: invert(1);
+}
+
+/* Desktop Navigation */
+.desktopNav {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.8vw, 28px);
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.navLink {
+  color: #5C5C58;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 2px;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.navLink:hover {
+  color: #0B0B0B;
+}
+
+/* Desktop Actions */
+.desktopActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 17px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid #DEDED9;
+  color: #0B0B0B;
+  background: #fff;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.btnSecondary:hover {
+  background: #F7F7F5;
+  border-color: #CFCFC8;
+  color: #0B0B0B;
+  transform: translateY(-1px);
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--lz-accent, #C1502E);
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(193, 80, 46, 0.2);
+}
+
+.btnPrimary:hover {
+  opacity: 0.94;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(193, 80, 46, 0.28);
+}
+
+/* Mobile Controls Area */
+.mobileControls {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobileQuickCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--lz-accent, #C1502E);
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.mobileQuickCta:hover {
+  opacity: 0.92;
+  color: #fff;
+}
+
+/* Hamburger Toggle Button */
+.hamburgerBtn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #F9F9F8;
+  border: 1px solid #E5E5E0;
+  border-radius: var(--radius-md, 10px);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.hamburgerBtn:hover {
+  background: #F0F0EC;
+  border-color: #D6D6CF;
+}
+
+.hamburgerBtn:focus-visible {
+  outline: 2px solid var(--lz-accent, #C1502E);
+  outline-offset: 2px;
+}
+
+.bar {
+  width: 18px;
+  height: 2px;
+  background-color: #1A1A18;
+  border-radius: 2px;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s ease;
+  transform-origin: center;
+}
+
+/* Animated Hamburger to X */
+.hamburgerOpen .bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburgerOpen .bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+
+.hamburgerOpen .bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Backdrop Overlay */
+.backdrop {
+  display: none;
+}
+
+/* Mobile Dropdown Menu */
+.mobileMenu {
+  display: none;
+}
+
+/* Breakpoint for Mobile/Tablet (< 920px) */
+@media (max-width: 920px) {
+  .desktopNav,
+  .desktopActions {
+    display: none;
+  }
+
+  .mobileControls {
+    display: flex;
+  }
+
+  /* Backdrop: rendered outside the header at z-index 90 (header is z-index 100) */
+  .backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(11, 11, 11, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .backdropActive {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobileMenu {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #FFFFFF;
+    border-bottom: 1px solid #EBEBE7;
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.14),
+                0 1px 3px rgba(0, 0, 0, 0.04);
+    z-index: 1;
+    padding: 16px clamp(18px, 4vw, 36px) 24px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+  }
+
+  .mobileMenuOpen {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobileNavList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobileNavItem {
+    display: block;
+  }
+
+  .mobileNavLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0B0B0B;
+    text-decoration: none;
+    border-radius: var(--radius-md, 10px);
+    transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  }
+
+  .mobileNavLink:hover,
+  .mobileNavLink:active {
+    background: #F6F6F3;
+    color: var(--lz-accent, #C1502E);
+  }
+
+  .mobileNavArrow {
+    color: #A2A29C;
+    font-size: 14px;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .mobileNavLink:hover .mobileNavArrow {
+    transform: translateX(3px);
+    color: var(--lz-accent, #C1502E);
+  }
+
+  .mobileDivider {
+    height: 1px;
+    background: #EBEBE7;
+    margin: 14px 4px 18px;
+  }
+
+  .mobileActionGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 4px;
+  }
+
+  .mobileActionSecondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: var(--radius-md, 10px);
+    border: 1px solid #DEDED9;
+    color: #0B0B0B;
+    background: #fff;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .mobileActionSecondary:hover,
+  .mobileActionSecondary:active {
+    background: #F7F7F5;
+    color: #0B0B0B;
+  }
+
+  .mobileActionPrimary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: var(--radius-md, 10px);
+    background: var(--lz-accent, #C1502E);
+    color: #fff;
+    text-decoration: none;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 3px 12px rgba(193, 80, 46, 0.25);
+  }
+
+  .mobileActionPrimary:hover,
+  .mobileActionPrimary:active {
+    opacity: 0.92;
+    color: #fff;
+  }
+}
+
+/* Very narrow screens (< 460px): hide the mobile quick CTA to give full room to logo and hamburger */
+@media (max-width: 460px) {
+  .mobileQuickCta {
+    display: none;
+  }
+}
+
+@supports (corner-shape: squircle) {
+  .btnSecondary,
+  .btnPrimary,
+  .mobileQuickCta,
+  .hamburgerBtn,
+  .mobileNavLink,
+  .mobileActionSecondary,
+  .mobileActionPrimary {
+    corner-shape: squircle;
+  }
+}
+
