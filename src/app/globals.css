@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Silkscreen:wght@400;700&display=swap');
+
+:root {
+  --lz-accent: #C1502E;
+  --lz-tint: color-mix(in oklch, var(--lz-accent) 8%, white);
+  --lz-hair: color-mix(in oklch, var(--lz-accent) 17%, white);
+  --lz-tint2: color-mix(in oklch, var(--lz-accent) 30%, white);
+  --lz-mid: color-mix(in oklch, var(--lz-accent) 46%, white);
+  --lz-soft: color-mix(in oklch, var(--lz-accent) 54%, white);
+  --lz-ink2: color-mix(in oklch, var(--lz-accent) 58%, white);
+  --lz-lite: color-mix(in oklch, var(--lz-accent) 66%, white);
+  --lz-glow: color-mix(in srgb, var(--lz-accent) 40%, transparent);
+  --lz-sweep: color-mix(in srgb, var(--lz-accent) 9%, transparent);
+  --lz-play: running;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #0B0B0B;
+  font-family: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+a {
+  color: #0B0B0B;
+  text-decoration: none;
+  transition: color .2s ease, opacity .2s ease, background .25s ease, border-color .25s ease;
+}
+
+a:hover {
+  color: var(--lz-accent, #C1502E);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--lz-accent, #C1502E);
+  color: #fff;
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+
+@keyframes lzTick {
+  0%, 6% { opacity: 0; transform: scale(.55); }
+  13%, 90% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.55); }
+}
+
+@keyframes lzRail {
+  0% { transform: scaleY(0); }
+  62%, 100% { transform: scaleY(1); }
+}
+
+@keyframes lzPulse {
+  0%, 100% { opacity: .2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+@keyframes lzRowIn {
+  0%, 8% { opacity: 0; transform: translateY(10px); }
+  18%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+@keyframes lzSlideX {
+  0%, 7% { opacity: 0; transform: translateX(-16px); }
+  19%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateX(5px); }
+}
+
+@keyframes lzBar {
+  0% { transform: scaleX(0); }
+  52%, 100% { transform: scaleX(1); }
+}
+
+@keyframes lzRise {
+  0%, 4% { transform: scaleY(.04); }
+  34%, 80% { transform: scaleY(1); }
+  100% { transform: scaleY(.04); }
+}
+
+@keyframes lzWipe {
+  0%, 16% { width: 0; }
+  44%, 100% { width: 100%; }
+}
+
+@keyframes lzCaret {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0; }
+}
+
+@keyframes lzNode {
+  0%, 24% { opacity: 0; transform: translateY(8px); }
+  38%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+@keyframes lzDrift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes lzSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
+}
+
+@keyframes lzSpark {
+  0% { stroke-dashoffset: 200; }
+  60%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes lzTerm {
+  0%, 10% { opacity: 0; transform: translateY(4px); }
+  22%, 94% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
