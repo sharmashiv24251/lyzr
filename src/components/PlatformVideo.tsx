@@ -9,12 +9,29 @@ export default function PlatformVideo() {
   const [isZoomed, setIsZoomed] = useState(false);
 
   useEffect(() => {
-    // Ensure muted autoplay starts smoothly
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay may be deferred until user interaction
-      });
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Don't pull the 23 MB source on page load. preload="none" keeps it
+    // unloaded; we only call load()/play() once the section scrolls into view.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            video.load();
+            video.play().catch(() => {
+              // Autoplay may be deferred until user interaction
+            });
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(video);
+
+    return () => observer.disconnect();
   }, []);
 
   const toggleSound = (e: React.MouseEvent) => {
@@ -110,12 +127,12 @@ export default function PlatformVideo() {
                 loop
                 muted={isMuted}
                 playsInline
-                preload="auto"
+                preload="none"
                 poster="/assets/one-studio-poster.webp"
               >
-                <source src="/assets/one-studio.mp4" type="video/mp4" />
+                <source src="/assets/one-studio.webm" type="video/webm" />
                 <source
-                  src="https://www.lyzr.ai/wp-content/uploads/2026/05/One-Studio.-Infinite-Possibilities.mp4"
+                  src="/assets/one-studio-compressed.mp4"
                   type="video/mp4"
                 />
                 Your browser does not support the video tag.

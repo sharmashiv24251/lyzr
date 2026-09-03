@@ -2,9 +2,34 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.lyzr.ai"),
   title: "Lyzr — Agents in production",
   description:
     "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+  openGraph: {
+    title: "Lyzr — Agents in production",
+    description:
+      "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+    url: "https://www.lyzr.ai",
+    siteName: "Lyzr",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Lyzr — Agents in production",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lyzr — Agents in production",
+    description:
+      "Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
