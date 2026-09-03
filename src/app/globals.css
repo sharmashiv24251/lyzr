@@ -320,10 +320,10 @@ button:active,
 
 @media (max-width: 768px) {
   #top {
-    --lz-hero-pt: clamp(140px, 20vh, 200px);
-    --lz-hero-pt: clamp(140px, 20dvh, 200px);
-    padding-top: clamp(140px, 20vh, 200px) !important;
-    padding-top: clamp(140px, 20dvh, 200px) !important;
+    --lz-hero-pt: clamp(98px, 14vh, 140px);
+    --lz-hero-pt: clamp(98px, 14dvh, 140px);
+    padding-top: clamp(98px, 14vh, 140px) !important;
+    padding-top: clamp(98px, 14dvh, 140px) !important;
   }
 }
 
