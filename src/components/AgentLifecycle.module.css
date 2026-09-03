@@ -1,0 +1,1024 @@
+/* ------------------------------------------------------------------
+   Agent lifecycle — one pinned frame, five acts.
+   Scroll is time: an agent goes from described to audited.
+
+   Colour rule (see PRODUCT.md, principle 2):
+   terracotta appears ONLY where a machine decision was intercepted.
+   Acts 03 and 04 are the only acts allowed to use it.
+   ------------------------------------------------------------------ */
+
+.root {
+  --frame-w: 1180px;
+  --ink: #0b0b0b;
+  --ink-2: #4a4a46;
+  /* muted text tokens are held at >=4.5:1 against #fafaf8, the lightest
+     surface they ever sit on. #9c9c97 measured 2.3:1 and failed. */
+  --ink-3: #63635d;
+  --ink-4: #6f6f69;
+  /* decoration only — never carries text */
+  --dot: #c6c6c0;
+  --line: #e7e7e2;
+  --line-2: #efefeb;
+  --paper: #fff;
+  --paper-2: #fafaf8;
+  --paper-3: #fcfcfb;
+  --sunk: #f4f4f1;
+  --hold: var(--lz-accent, #c1502e);
+  --hold-bg: #fbf1ed;
+  --ok: #4e7360;
+  --ok-bg: #edf3ee;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 0 clamp(18px, 4vw, 48px);
+}
+
+/* the tall scroll track the sticky stage lives inside */
+.track {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 26px);
+  padding: clamp(56px, 7vh, 88px) 0 clamp(28px, 4vh, 48px);
+}
+
+/* ---------- heading above the frame ---------- */
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 46px);
+  font-weight: 500;
+  letter-spacing: -0.036em;
+  line-height: 1.04;
+  max-width: 20em;
+  text-wrap: balance;
+}
+
+.title span {
+  color: #a2a29c;
+}
+
+/* ---------- act rail ---------- */
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  padding: 4px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.railItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  white-space: nowrap;
+  background: transparent;
+  transition: color 0.35s ease, background 0.35s ease;
+}
+
+.railDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  opacity: 0.45;
+  transition: opacity 0.35s ease;
+}
+
+.railItem[data-on="1"] {
+  color: var(--ink);
+  background: var(--sunk);
+}
+
+.railItem[data-on="1"] .railDot {
+  opacity: 1;
+}
+
+/* the two acts where the system intercepts */
+.railItem[data-on="1"][data-intercept="1"] {
+  color: var(--hold);
+  background: var(--hold-bg);
+}
+
+/* ---------- the persistent frame ---------- */
+
+.frameWrap {
+  background: var(--sunk);
+  background-image: radial-gradient(#e0e0d9 1px, transparent 1px);
+  background-size: 15px 15px;
+  background-position: -1px -1px;
+  border-radius: clamp(18px, 2vw, 24px);
+  corner-shape: squircle;
+  padding: clamp(12px, 1.4vw, 20px);
+}
+
+.frame {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 30px 56px -36px rgba(0, 0, 0, 0.26);
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-2);
+  background: var(--paper-2);
+}
+
+.lights {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.lights i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e0e0da;
+}
+
+.crumb {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin: 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crumb b {
+  color: var(--ink-2);
+  font-weight: 400;
+}
+
+.state {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  background: var(--ok-bg);
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+.state[data-intercept="1"] {
+  background: var(--hold-bg);
+  color: var(--hold);
+}
+
+.statePip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ---------- act stack ---------- */
+
+.acts {
+  position: relative;
+  min-height: clamp(360px, 46vh, 470px);
+}
+
+.act {
+  position: absolute;
+  inset: 0;
+  padding: clamp(16px, 2vw, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+/* Default state is VISIBLE for act 1 and hidden-but-present for the rest,
+   so a no-JS or headless render still shows a complete first frame
+   instead of an empty box. JS opts into animating. */
+.act[data-act="0"] {
+  opacity: 1;
+}
+
+.act:not([data-act="0"]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.root[data-js="1"] .act {
+  pointer-events: none;
+}
+
+.root[data-js="1"] .act[data-live="1"] {
+  pointer-events: auto;
+}
+
+/* ---------- caption under the frame ---------- */
+
+.caption {
+  position: relative;
+  min-height: 3.2em;
+}
+
+.captionItem {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  font-size: clamp(14px, 1.5vw, 16.5px);
+  color: var(--ink-2);
+  max-width: 62ch;
+  opacity: 0;
+}
+
+.captionItem[data-act="0"] {
+  opacity: 1;
+}
+
+.captionItem b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ==================================================================
+   ACT 01 — describe
+   ================================================================== */
+
+.architect {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-content: start;
+}
+
+.promptBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-3);
+  padding: 14px 14px 14px 16px;
+}
+
+.promptDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dot);
+  flex: none;
+}
+
+.promptText {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: var(--ink);
+  letter-spacing: -0.012em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  background: var(--ink);
+  vertical-align: -0.18em;
+  margin-left: 2px;
+}
+
+.buildBtn {
+  flex: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.wired {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-3);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.wiredHead {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+
+.chipTick {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--ok-bg);
+  color: var(--ok);
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  line-height: 1;
+  flex: none;
+}
+
+.specRows {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+}
+
+.specRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-2);
+  font-size: 13px;
+}
+
+.specRow dt {
+  color: var(--ink-3);
+  margin: 0;
+}
+
+.specRow dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+/* ==================================================================
+   ACT 02 — register
+   ================================================================== */
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 620px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line-2);
+  background: var(--paper-3);
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #f4f4f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.agentName {
+  font-weight: 500;
+  letter-spacing: -0.012em;
+}
+
+.builtOn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.mark {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  object-fit: contain;
+  display: block;
+}
+
+.num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.pill[data-tone="idle"] {
+  background: #f2f2ee;
+  color: #85857e;
+}
+
+.tableFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/* ==================================================================
+   ACT 03 — gate
+   ================================================================== */
+
+.pipe {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.stageBox {
+  flex: 1 1 0;
+  min-width: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-3);
+  padding: 11px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.stageName {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: -0.008em;
+  line-height: 1.25;
+}
+
+.stageState {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.stageBar {
+  height: 3px;
+  border-radius: 2px;
+  background: #ebebe6;
+  overflow: hidden;
+}
+
+.stageBar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.stageBox[data-tone="pass"] .stageState {
+  color: var(--ok);
+}
+
+.stageBox[data-tone="fail"] {
+  border-color: var(--hold);
+  background: var(--hold-bg);
+}
+
+.stageBox[data-tone="fail"] .stageState {
+  color: var(--hold);
+}
+
+.stageBox[data-tone="fail"] .stageBar i {
+  background: var(--hold);
+}
+
+.commits {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.commitRow {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr) 78px 70px 88px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f4f4f0;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.commitRow:last-child {
+  border-bottom: 0;
+}
+
+.commitRow[data-head="1"] {
+  background: var(--paper-3);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.commitRow[data-tone="fail"] {
+  background: var(--hold-bg);
+}
+
+.sha {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.msg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.008em;
+}
+
+.who,
+.when {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.verdict {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.commitRow[data-tone="fail"] .verdict,
+.commitRow[data-tone="fail"] .sha {
+  color: var(--hold);
+}
+
+/* ==================================================================
+   ACT 04 — hold
+   ================================================================== */
+
+.holdGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.letter {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 18px 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.letterHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.letterMark {
+  width: 15px;
+  height: 15px;
+  background: var(--ink);
+  flex: none;
+}
+
+.letterOrg {
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+}
+
+.letterKind {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+
+.letterRef {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-2);
+}
+
+.refPip {
+  width: 8px;
+  height: 8px;
+  background: var(--hold);
+  flex: none;
+}
+
+.letterBody {
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #2a2a28;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.letterBody p {
+  margin: 0;
+}
+
+/* Redaction bar — scales from 0 on the x axis so it *applies* to the text
+   rather than appearing pre-drawn. The span carries no text, so it needs an
+   explicit height: without it the box collapsed and the bar rendered as a
+   thin underline instead of a covering block. */
+.redact {
+  position: relative;
+  display: inline-block;
+  height: 1.02em;
+  vertical-align: -0.22em;
+}
+
+.redact > i {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: -0.06em;
+  bottom: -0.1em;
+  background: #000;
+  transform: scaleX(0);
+  transform-origin: left center;
+  border-radius: 1px;
+}
+
+.holdMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.holdCard {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-3);
+  padding: 14px;
+}
+
+.holdCard[data-tone="hold"] {
+  border-color: var(--hold);
+  background: var(--hold-bg);
+}
+
+.holdLabel {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+
+.holdRun {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.holdNote {
+  font-size: 12.5px;
+  color: var(--hold);
+  font-weight: 500;
+}
+
+.verdictSwap {
+  position: relative;
+  display: inline-grid;
+  vertical-align: middle;
+}
+
+.verdictSwap > span {
+  grid-area: 1 / 1;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+}
+
+.vAllowed {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.vHeld {
+  background: #fff;
+  border: 1px solid var(--hold);
+  color: var(--hold);
+  opacity: 0;
+}
+
+.scoreRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line-2);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.scoreRow:first-child {
+  border-top: 0;
+}
+
+.scoreRow b {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.scoreRow b[data-tone="hold"] {
+  color: var(--hold);
+}
+
+/* ==================================================================
+   ACT 05 — answer
+   ================================================================== */
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2vw, 22px);
+  height: 100%;
+  padding: clamp(4px, 2vw, 24px) 0;
+}
+
+.answerRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 24px);
+  align-items: start;
+}
+
+.answerTag {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-top: 0.5em;
+}
+
+.answerBefore {
+  margin: 0;
+  font-size: clamp(16px, 2.1vw, 23px);
+  line-height: 1.35;
+  color: var(--ink-4);
+  letter-spacing: -0.018em;
+}
+
+.answerAfter {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: clamp(12px, 1.42vw, 15.5px);
+  line-height: 1.65;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  word-break: break-word;
+}
+
+.answerAfter em {
+  font-style: normal;
+  color: var(--hold);
+}
+
+.answerRule {
+  height: 1px;
+  background: var(--line);
+}
+
+/* ==================================================================
+   responsive
+   ================================================================== */
+
+@media (max-width: 900px) {
+  .holdGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .holdMeta {
+    display: none;
+  }
+
+  .commitRow {
+    grid-template-columns: 72px minmax(0, 1fr) 84px;
+  }
+
+  .commitRow .who,
+  .commitRow .when {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .acts {
+    min-height: 400px;
+  }
+
+  .rail {
+    align-self: stretch;
+    overflow-x: auto;
+  }
+
+  .answerRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+/* ==================================================================
+   reduced motion / no-JS: five acts become five static blocks.
+   Nothing is gated behind an animation that may never fire.
+   ================================================================== */
+
+.staticList {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 52px);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.staticItem .frameWrap {
+  margin-bottom: 14px;
+}
+
+.staticItem .acts {
+  min-height: 0;
+}
+
+.staticItem .act {
+  position: relative;
+  inset: auto;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  min-height: clamp(340px, 42vh, 440px);
+}
+
+.staticItem .redact > i {
+  transform: scaleX(1);
+}
+
+.staticItem .vHeld {
+  opacity: 1;
+}
+
+.staticItem .vAllowed {
+  opacity: 0;
+}
+
+.staticItem .stageBar i {
+  width: 100%;
+}
+
+.staticItem .captionItem {
+  position: relative;
+  opacity: 1;
+}
+
+.staticItem .caption {
+  min-height: 0;
+}
+
+/* model marks sitting inline in the Architect spec sheet */
+.modelDd {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modelMarks {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

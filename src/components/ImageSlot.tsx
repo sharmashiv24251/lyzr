@@ -11,6 +11,9 @@ interface ImageSlotProps {
   style?: React.CSSProperties;
   className?: string;
   fit?: "cover" | "contain";
+  /* object-position for the inner image, e.g. "top" to keep the head of a
+     tall artwork visible when the frame is shorter than the source. */
+  position?: string;
 }
 
 export default function ImageSlot({
@@ -22,6 +25,7 @@ export default function ImageSlot({
   style,
   className,
   fit = "cover",
+  position,
 }: ImageSlotProps) {
   // If id is lz-founder and no src provided, default to founder-siva.png from assets
   const resolvedSrc = src || (id === "lz-founder" ? "/assets/founder-siva.png" : undefined);
@@ -54,6 +58,7 @@ export default function ImageSlot({
               width: "100%",
               height: "100%",
               objectFit: fit,
+              objectPosition: position,
               display: "block",
             }}
           />

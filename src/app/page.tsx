@@ -1,25 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import ImageSlot from "@/components/ImageSlot";
-
-const LAYERS = [
-  { i: '01', t: 'Connect agents from anywhere', l: 'Every platform, every cloud. Register what already runs — no migration, no rewrite.', k: ['Frameworks', 'Also', 'Migration'], v: ['bedrock · azure · vertex', 'langchain · agentforce', 'none required'] },
-  { i: '02', t: 'Run on any model', l: 'Swap providers without touching the agent. Pin versions so a deprecation is never a fire drill.', k: ['Hosted', 'Private', 'Switching cost'], v: ['claude · gpt · gemini', 'llama · mistral · yours', 'one config line'] },
-  { i: '03', t: 'Rehearse before you ship', l: 'Replay real traffic shapes and adversarial cases against a release candidate until it holds.', k: ['Per release', 'Coverage', 'Gate'], v: ['500 runs', 'edge + adversarial', 'blocks promotion'] },
-  { i: '04', t: 'Full trace on every run', l: 'Every step, tool call, token and millisecond — attributable to an agent, a version and an owner.', k: ['Granularity', 'Retention', 'Export'], v: ['per step', 'you decide', 'otel · s3'] },
-  { i: '05', t: 'Hallucination and PII guard', l: 'Grounding scored on the way out. Unsupported claims held, personal data redacted before it leaves.', k: ['Grounding', 'Redaction', 'On fail'], v: ['scored 0–1', 'named entities', 'hold + notify'] },
-  { i: '06', t: 'Access and governance', l: 'Role-based access, spend budgets, data residency and retention — set once, enforced everywhere.', k: ['Identity', 'Budgets', 'Residency'], v: ['okta · entra · saml', 'per agent / team', 'per region'] },
-  { i: '07', t: 'Audit and compliance', l: 'An immutable record of every decision an agent made, exportable the day the auditor asks.', k: ['Log', 'Frameworks', 'Export'], v: ['immutable', 'soc2 · iso · hipaa', 'csv · api'] }
-];
+import AgentLifecycle from "@/components/AgentLifecycle";
 
 export default function LandingPage() {
-  const [mode, setMode] = useState<'business' | 'developer'>('business');
-  const [activeLayer, setActiveLayer] = useState<number>(0);
-  const [hoverLayer, setHoverLayer] = useState<number | null>(null);
-
-  const currentLayer = LAYERS[hoverLayer !== null ? hoverLayer : activeLayer];
-
   useEffect(() => {
     // 1. Reveal observer
     const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
@@ -136,8 +121,12 @@ export default function LandingPage() {
     };
   }, []);
 
+  // overflow-x must be `clip`, not `hidden`: `hidden` establishes a scroll
+  // container, which silently breaks `position: sticky` for every descendant
+  // (the pinned lifecycle stage never engaged). `clip` still prevents
+  // horizontal scroll but creates no scrollport.
   return (
-<div style={{ overflowX: "hidden" }}>
+<div style={{ overflowX: "clip" }}>
 
 <header style={{ position: "sticky", top: "0", zIndex: "60", background: "#fff", borderBottom: "1px solid #EBEBE7" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "14px clamp(18px,4vw,48px)", display: "flex", alignItems: "center", gap: "clamp(16px,2.4vw,34px)", rowGap: "10px", flexWrap: "wrap" }}>
@@ -157,190 +146,22 @@ export default function LandingPage() {
   </div>
 </header>
 
-<section id="top" style={{ padding: "clamp(44px,5.4vw,80px) clamp(18px,4vw,48px) clamp(28px,3vw,44px)" }}>
-  <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "clamp(30px,4vw,64px)", alignItems: "center" }}>
-
-    <div style={{ flex: "1 1 420px", minWidth: "0" }}>
-      <div data-reveal="1" style={{ display: "inline-flex", padding: "3px", borderRadius: "999px", background: "#F3F3F0", border: "1px solid #E7E7E2", marginBottom: "clamp(22px,2.4vw,30px)" }}>
-        <button
-          type="button"
-          data-mode="business"
-          onClick={() => setMode('business')}
-          style={{
-            fontFamily: "'Silkscreen', monospace",
-            fontSize: "9.5px",
-            letterSpacing: ".09em",
-            textTransform: "uppercase",
-            padding: "9px 15px",
-            borderRadius: "999px",
-            background: mode === 'business' ? "#fff" : "transparent",
-            color: mode === 'business' ? "#0B0B0B" : "#9C9C97",
-            boxShadow: mode === 'business' ? "0 1px 2px rgba(0,0,0,.06)" : "none",
-          }}
-        >
-          For business
-        </button>
-        <button
-          type="button"
-          data-mode="developer"
-          onClick={() => setMode('developer')}
-          style={{
-            fontFamily: "'Silkscreen', monospace",
-            fontSize: "9.5px",
-            letterSpacing: ".09em",
-            textTransform: "uppercase",
-            padding: "9px 15px",
-            borderRadius: "999px",
-            background: mode === 'developer' ? "#fff" : "transparent",
-            color: mode === 'developer' ? "#0B0B0B" : "#9C9C97",
-            boxShadow: mode === 'developer' ? "0 1px 2px rgba(0,0,0,.06)" : "none",
-          }}
-        >
-          For developers
-        </button>
-      </div>
-      <h1 data-reveal="1" style={{ margin: "0", fontSize: "clamp(42px,5.6vw,86px)", fontWeight: "500", letterSpacing: "-.045em", lineHeight: ".97" }}>Demos are easy.<br /><span style={{ color: "#A2A29C" }}>Production is the job.</span></h1>
-      <p
-        data-reveal="1"
-        data-slot="hero-sub"
-        style={{
-          margin: "clamp(20px,2.2vw,28px) 0 0",
-          maxWidth: "31em",
-          fontSize: "clamp(17px,1.3vw,20px)",
-          color: "#5C5C58",
-          letterSpacing: "-.012em",
-        }}
-      >
-        {mode === 'business'
-          ? 'Lyzr is the layer between a working agent and a governed one — registry, policy, simulation, observability and guardrails, running inside your own cloud.'
-          : 'Register agents from any framework, apply a policy pack, simulate a release and deploy to your own VPC — from an SDK, the CLI, or an MCP server your agents can call.'}
-      </p>
-      <div data-reveal="1" style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "clamp(24px,2.6vw,34px)" }}>
-        <a href="#cta" style={{ fontSize: "16px", fontWeight: "500", padding: "14px 24px", borderRadius: "11px", background: "var(--lz-accent,#C1502E)", color: "#fff" }}>Talk to us</a>
-        <a href="#platform" style={{ fontSize: "16px", fontWeight: "500", padding: "14px 24px", borderRadius: "11px", border: "1px solid #DEDED9", color: "#0B0B0B" }}>See the control plane</a>
-      </div>
-    </div>
-
-    <div data-reveal="1" style={{ flex: "1.08 1 460px", minWidth: "0" }}>
-
-      <div data-artifact="business" style={{ display: mode === "business" ? "block" : "none", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "22px", padding: "clamp(14px,1.4vw,20px)" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-
-          <div style={{ flex: "1 1 208px", minWidth: "0", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "13px", overflow: "hidden", boxShadow: "0 1px 2px rgba(0,0,0,.03),0 18px 36px -28px rgba(0,0,0,.2)" }}>
-            <div style={{ padding: "11px 13px", borderBottom: "1px solid #EFEFEB", fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".1em", textTransform: "uppercase", color: "#A8A8A2", display: "flex", alignItems: "center", gap: "7px" }}>
-              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--lz-accent,#C1502E)", animation: "lzPulse 2.4s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}></span>the stack</div>
-            <div data-layers="1">
-              {[
-                { i: "01", lbl: "Connect" },
-                { i: "02", lbl: "Any model" },
-                { i: "03", lbl: "Simulation" },
-                { i: "04", lbl: "Observability" },
-                { i: "05", lbl: "Guardrails" },
-                { i: "06", lbl: "Governance" },
-                { i: "07", lbl: "Audit" },
-              ].map((item, idx) => {
-                const isSelected = (hoverLayer !== null ? hoverLayer : activeLayer) === idx;
-                return (
-                  <button
-                    key={item.i}
-                    type="button"
-                    data-layer={idx}
-                    onClick={() => setActiveLayer(idx)}
-                    onMouseEnter={() => setHoverLayer(idx)}
-                    onMouseLeave={() => setHoverLayer(null)}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "9px",
-                      padding: "10px 13px",
-                      textAlign: "left",
-                      borderBottom: idx < 6 ? "1px solid #F5F5F1" : "none",
-                      background: isSelected ? "var(--lz-tint, #FBF3EF)" : "transparent",
-                    }}
-                  >
-                    <span
-                      data-dot="1"
-                      style={{
-                        flex: "none",
-                        width: "14px",
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "9.5px",
-                        color: isSelected ? "var(--lz-accent, #C1502E)" : "#C1CDC5",
-                      }}
-                    >
-                      {item.i}
-                    </span>
-                    <span
-                      data-lbl="1"
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "500",
-                        letterSpacing: "-.012em",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        color: isSelected ? "var(--lz-accent, #C1502E)" : "#0B0B0B",
-                      }}
-                    >
-                      {item.lbl}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div style={{ flex: "1.25 1 240px", minWidth: "0", display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "13px", padding: "17px 17px 15px", boxShadow: "0 1px 2px rgba(0,0,0,.03),0 18px 36px -28px rgba(0,0,0,.2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".1em", textTransform: "uppercase", color: "var(--lz-accent,#C1502E)" }}><span data-slot="idx">layer {currentLayer.i}</span><span style={{ flex: "1", height: "1px", background: "var(--lz-hair,#EFE1DB)" }}></span></div>
-              <div data-slot="title" style={{ fontSize: "clamp(17px,1.4vw,21px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2", marginTop: "11px" }}>{currentLayer.t}</div>
-              <p data-slot="line" style={{ margin: "8px 0 0", fontSize: "14px", color: "#6E6E68", letterSpacing: "-.008em" }}>{currentLayer.l}</p>
-              <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid #F1F1ED", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}><span style={{ color: "#9C9C97" }} data-slot="k1">{currentLayer.k[0]}</span><span data-slot="v1" style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", textAlign: "right" }}>{currentLayer.v[0]}</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}><span style={{ color: "#9C9C97" }} data-slot="k2">{currentLayer.k[1]}</span><span data-slot="v2" style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", textAlign: "right" }}>{currentLayer.v[1]}</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}><span style={{ color: "#9C9C97" }} data-slot="k3">{currentLayer.k[2]}</span><span data-slot="v3" style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", textAlign: "right" }}>{currentLayer.v[2]}</span></div>
-              </div>
-            </div>
-            <div style={{ background: "#0B0B0B", borderRadius: "13px", padding: "15px 17px", color: "#fff", display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--lz-accent,#C1502E)", animation: "lzPulse 2.2s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}></span>
-              <span style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".1em", textTransform: "uppercase", color: "rgba(255,255,255,.55)" }}>deployed in</span>
-              <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11.5px" }}>your vpc · us-east-1</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div data-artifact="developer" style={{ display: mode === "developer" ? "block" : "none", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "22px", padding: "clamp(14px,1.4vw,20px)" }}>
-        <div style={{ background: "#0B0B0B", borderRadius: "13px", overflow: "hidden", boxShadow: "0 20px 44px -30px rgba(0,0,0,.5)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "11px 15px", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-            <div style={{ display: "flex", gap: "5px" }}><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "rgba(255,255,255,.16)" }}></span><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "rgba(255,255,255,.16)" }}></span><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "rgba(255,255,255,.16)" }}></span></div>
-            <span style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".11em", textTransform: "uppercase", color: "rgba(255,255,255,.42)" }}>lyzr cli</span>
-            <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "rgba(255,255,255,.35)" }}>v2.4.1</span>
-          </div>
-          <div style={{ padding: "18px 17px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12.5px", lineHeight: "1.85", color: "rgba(255,255,255,.82)" }}>
-            <div style={{ animation: "lzTerm 11s ease-out infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ color: "var(--lz-accent,#C1502E)" }}>$</span> pip install lyzr</div>
-            <div style={{ animation: "lzTerm 11s ease-out .5s infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ color: "var(--lz-accent,#C1502E)" }}>$</span> lyzr registry sync --from bedrock,azure</div>
-            <div style={{ color: "rgba(255,255,255,.46)", animation: "lzTerm 11s ease-out 1s infinite", animationPlayState: "var(--lz-play,running)" }}>  ✓ 4 agents discovered · lineage captured</div>
-            <div style={{ color: "rgba(255,255,255,.46)", animation: "lzTerm 11s ease-out 1.4s infinite", animationPlayState: "var(--lz-play,running)" }}>  ✓ policy pack applied · 24 rules</div>
-            <div style={{ animation: "lzTerm 11s ease-out 2s infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ color: "var(--lz-accent,#C1502E)" }}>$</span> lyzr deploy claims-triage --target vpc</div>
-            <div style={{ color: "rgba(255,255,255,.46)", animation: "lzTerm 11s ease-out 2.5s infinite", animationPlayState: "var(--lz-play,running)" }}>  → simulation 500/500 passed</div>
-            <div style={{ animation: "lzTerm 11s ease-out 3s infinite", animationPlayState: "var(--lz-play,running)" }}>  → <span style={{ color: "#8FBF9F" }}>live</span> us-east-1 · p95 240ms<span style={{ display: "inline-block", width: "7px", height: "14px", background: "var(--lz-accent,#C1502E)", verticalAlign: "-2px", marginLeft: "6px", animation: "lzCaret 1s step-end infinite", animationPlayState: "var(--lz-play,running)" }}></span></div>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", padding: "12px 17px", borderTop: "1px solid rgba(255,255,255,.08)", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "rgba(255,255,255,.38)" }}>
-            <span>python sdk</span><span>typescript sdk</span><span>rest</span><span>mcp server</span><span>helm chart</span>
-          </div>
-        </div>
-      </div>
-
+<section id="top" style={{ padding: "clamp(32px,4vw,64px) clamp(18px,4vw,48px) clamp(20px,2.2vw,32px)" }}>
+  <div style={{ maxWidth: "1040px", margin: "0 auto", textAlign: "center" }}>
+    <h1 data-reveal="1" style={{ margin: "0", fontSize: "clamp(42px,6.2vw,88px)", fontWeight: "500", letterSpacing: "-.045em", lineHeight: ".97", textWrap: "balance" }}>Demos are easy.<br /><span style={{ color: "#A2A29C" }}>Production is the job.</span></h1>
+    <p data-reveal="1" style={{ margin: "clamp(20px,2.2vw,28px) auto 0", maxWidth: "34em", fontSize: "clamp(17px,1.3vw,20px)", color: "#5C5C58", letterSpacing: "-.012em", textWrap: "pretty" }}>Lyzr is the layer between a working agent and a governed one &mdash; registry, policy, simulation, observability and guardrails, running inside your own cloud.</p>
+    <div data-reveal="1" style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "clamp(26px,2.8vw,36px)" }}>
+      <a href="#cta" style={{ fontSize: "16px", fontWeight: "500", padding: "14px 24px", borderRadius: "11px", background: "var(--lz-accent,#C1502E)", color: "#fff" }}>Talk to us</a>
+      <a href="#platform" style={{ fontSize: "16px", fontWeight: "500", padding: "14px 24px", borderRadius: "11px", border: "1px solid #DEDED9", color: "#0B0B0B" }}>See the control plane</a>
     </div>
   </div>
 </section>
 
+<AgentLifecycle />
+
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(66px,8vw,116px)" }}>
   
-    <div data-reveal="1" style={{ maxWidth: "1280px", margin: "0 auto", background: "var(--lz-tint,#FBF3EF)", border: "1px solid #F0E1D9", borderRadius: "16px", padding: "clamp(20px,2.2vw,30px) clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,3vw,44px)" }}>
+    <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "var(--lz-tint,#FBF3EF)", border: "1px solid #F0E1D9", borderRadius: "16px", padding: "clamp(20px,2.2vw,30px) clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,3vw,44px)" }}>
       <div style={{ flex: "1 1 152px" }}>
         <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".11em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}>agents in production</div>
         <div data-count="1047" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px" }}>1,047</div>
@@ -350,7 +171,7 @@ export default function LandingPage() {
         <div data-count="482193" data-live="1" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px" }}>482,193</div>
       </div>
       <div style={{ flex: "1 1 152px" }}>
-        <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".11em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}>unsafe outputs held</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".11em", textTransform: "uppercase", color: "var(--lz-ink2,#B08574)" }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" /></svg>unsafe outputs stopped</div>
         <div data-count="3204" data-live="1" style={{ fontSize: "clamp(24px,2.4vw,34px)", fontWeight: "500", letterSpacing: "-.03em", marginTop: "7px", color: "var(--lz-accent,#C1502E)" }}>3,204</div>
       </div>
       <div style={{ flex: "1 1 152px" }}>
@@ -434,7 +255,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" style={{ flex: "1 1 262px", minWidth: "0", background: "#0B0B0B", borderRadius: "16px", padding: "22px 22px 20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+      <div data-reveal="1" data-squircle="" style={{ flex: "1 1 262px", minWidth: "0", background: "#0B0B0B", borderRadius: "16px", padding: "22px 22px 20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
         <span style={{ position: "absolute", left: "0", top: "0", right: "0", height: "150px", background: "radial-gradient(70% 100% at 30% 0%,var(--lz-glow,rgba(193,80,46,.4)),transparent 72%)", pointerEvents: "none" }}></span>
         <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "9px" }}>
           <span style={{ padding: "5px 8px", borderRadius: "6px", background: "#fff", fontSize: "11.5px", fontWeight: "700", letterSpacing: ".02em", color: "#0B0B0B" }}>WTW</span>
@@ -466,153 +287,19 @@ export default function LandingPage() {
   </div>
 </section>
 
-<section id="platform" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
+<section id="surfaces" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-    <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "24em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>One control plane for every agent.<br /><span style={{ color: "#A2A29C" }}>Wherever it was built. Whoever built it.</span></h2>
+    <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "22em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Registry, policy, traces, guardrails, cost.<br /><span data-dim="1">Every one of them, without a rewrite.</span></h2>
 
-    <div data-reveal="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(14px,1.6vw,22px)", marginBottom: "clamp(14px,1.6vw,22px)" }}>
-      <div style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "14px", overflow: "hidden", boxShadow: "0 1px 2px rgba(0,0,0,.03),0 30px 56px -36px rgba(0,0,0,.26)" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", borderBottom: "1px solid #EFEFEB", background: "#FAFAF8" }}>
-          <div style={{ display: "flex", gap: "6px" }}><span style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#E0E0DA" }}></span><span style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#E0E0DA" }}></span><span style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#E0E0DA" }}></span></div>
-          <span style={{ margin: "0 auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#9C9C97" }}>app.lyzr.ai / registry</span>
-          <div style={{ display: "flex", alignItems: "center", gap: "-6px" }}>
-            <span style={{ width: "21px", height: "21px", borderRadius: "50%", background: "#DFE4E8", border: "1.5px solid #fff", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "8.5px", color: "#5C6B75" }}>PR</span>
-            <span style={{ width: "21px", height: "21px", borderRadius: "50%", background: "#E8DFD9", border: "1.5px solid #fff", marginLeft: "-7px", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "8.5px", color: "#7A6357" }}>AK</span>
-            <span style={{ width: "21px", height: "21px", borderRadius: "50%", background: "#E3E3DC", border: "1.5px solid #fff", marginLeft: "-7px", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "8.5px", color: "#75756D" }}>+9</span>
-          </div>
-        </div>
 
-        <div style={{ display: "flex", alignItems: "stretch" }}>
-
-          <div style={{ flex: "none", width: "50px", borderRight: "1px solid #EFEFEB", background: "#FCFCFB", padding: "12px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "14px", height: "14px", border: "1.5px solid #C6C6C0", borderRadius: "3px" }}></span></div>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "14px", height: "14px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}><span style={{ height: "1.5px", background: "#C6C6C0" }}></span><span style={{ height: "1.5px", background: "#C6C6C0" }}></span><span style={{ height: "1.5px", background: "#C6C6C0" }}></span></span></div>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center", background: "var(--lz-tint,#FBF3EF)" }}><span style={{ width: "13px", height: "13px", border: "1.5px solid var(--lz-accent,#C1502E)", borderRadius: "3px", position: "relative" }}><span style={{ position: "absolute", inset: "2.5px", background: "var(--lz-accent,#C1502E)", borderRadius: "1px" }}></span></span></div>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "14px", height: "14px", border: "1.5px solid #C6C6C0", borderRadius: "50%" }}></span></div>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "14px", height: "14px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2.5px" }}><span style={{ background: "#C6C6C0", borderRadius: "1px" }}></span><span style={{ background: "#C6C6C0", borderRadius: "1px" }}></span><span style={{ background: "#C6C6C0", borderRadius: "1px" }}></span><span style={{ background: "#C6C6C0", borderRadius: "1px" }}></span></span></div>
-            <span style={{ width: "16px", height: "1px", background: "#EAEAE5", margin: "6px 0" }}></span>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "13px", height: "14px", border: "1.5px solid #C6C6C0", borderRadius: "2px 2px 6px 2px" }}></span></div>
-            <div style={{ width: "30px", height: "30px", borderRadius: "8px", display: "grid", placeItems: "center" }}><span style={{ width: "14px", height: "14px", border: "1.5px solid #C6C6C0", borderRadius: "50% 50% 4px 4px" }}></span></div>
-          </div>
-
-          <div style={{ flex: "1 1 auto", minWidth: "0" }}>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "13px 16px 11px", flexWrap: "wrap", rowGap: "8px" }}>
-              <span style={{ fontSize: "12.5px", color: "#A8A8A2", letterSpacing: "-.008em" }}>Registry</span>
-              <span style={{ color: "#D6D6D0", fontSize: "12px" }}>/</span>
-              <span style={{ fontSize: "15.5px", fontWeight: "500", letterSpacing: "-.018em" }}>Claims Triage</span>
-              <span style={{ padding: "2.5px 7px", borderRadius: "5px", border: "1px solid #E7E7E2", background: "#FBFBFA", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#8E8E88" }}>v14</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#4E7360" }}><span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#5C8A70", animation: "lzPulse 2.4s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}></span>LIVE</span>
-              <span style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
-                <span style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid #E4E4DF", background: "#fff", fontSize: "12.5px", fontWeight: "500", color: "#3D3D39", whiteSpace: "nowrap" }}>Compare</span>
-                <span style={{ padding: "7px 13px", borderRadius: "8px", background: "var(--lz-accent,#C1502E)", color: "#fff", fontSize: "12.5px", fontWeight: "500", whiteSpace: "nowrap" }}>Promote v15</span>
-              </span>
-            </div>
-
-            <div style={{ display: "flex", gap: "18px", padding: "0 16px", borderBottom: "1px solid #EFEFEB", fontSize: "12.5px", overflow: "hidden" }}>
-              <span style={{ padding: "0 0 9px", borderBottom: "2px solid #0B0B0B", fontWeight: "500", whiteSpace: "nowrap" }}>Runs</span>
-              <span style={{ padding: "0 0 9px", color: "#9C9C97", whiteSpace: "nowrap" }}>Traces</span>
-              <span style={{ padding: "0 0 9px", color: "#9C9C97", whiteSpace: "nowrap" }}>Policy <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#C6C6C0" }}>24</span></span>
-              <span style={{ padding: "0 0 9px", color: "#9C9C97", whiteSpace: "nowrap" }}>Simulations</span>
-              <span style={{ padding: "0 0 9px", color: "#9C9C97", whiteSpace: "nowrap" }}>Cost</span>
-              <span style={{ padding: "0 0 9px", color: "#9C9C97", whiteSpace: "nowrap" }}>Audit log</span>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", borderBottom: "1px solid #F4F4F0", flexWrap: "wrap", rowGap: "8px" }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "6px 10px", borderRadius: "7px", border: "1px solid #EAEAE5", background: "#FCFCFB", fontSize: "11.5px", color: "#B4B4AE", minWidth: "132px" }}><span style={{ width: "9px", height: "9px", border: "1.4px solid #C6C6C0", borderRadius: "50%" }}></span>Filter runs</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 9px", borderRadius: "6px", border: "1px solid #E7E7E2", background: "#fff", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#5C5C58" }}>verdict: all</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 9px", borderRadius: "6px", border: "1px solid #E7E7E2", background: "#fff", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#5C5C58" }}>window: 1h</span>
-              <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10.5px", color: "#A8A8A2", whiteSpace: "nowrap" }}>6,204 runs · 1 held</span>
-            </div>
-
-            <div style={{ width: "calc(100% + 96px)" }}>
-              <div style={{ display: "flex", alignItems: "center", padding: "0", borderBottom: "1px solid #EFEFEB", background: "#FCFCFB", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2" }}>
-                <span style={{ flex: "0 0 108px", padding: "8px 12px" }}>run</span>
-                <span style={{ flex: "0 0 96px", padding: "8px 8px" }}>started</span>
-                <span style={{ flex: "0 0 62px", padding: "8px 8px", textAlign: "right" }}>steps</span>
-                <span style={{ flex: "0 0 74px", padding: "8px 8px", textAlign: "right" }}>cost</span>
-                <span style={{ flex: "0 0 128px", padding: "8px 12px" }}>verdict</span>
-                <span style={{ flex: "0 0 150px", padding: "8px 12px" }}>note</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "transparent" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c91</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:42:18</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>7</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.031</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", color: "#4E7360", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>ALLOWED</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>tier-2 cover approved</span>
-            </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "transparent" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c8e</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:42:04</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>7</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.029</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", color: "#4E7360", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>ALLOWED</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>routed to payments</span>
-            </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "var(--lz-tint,#FBF3EF)" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c7a</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:41:51</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>5</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.018</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "var(--lz-tint,#FBF3EF)", color: "var(--lz-accent,#C1502E)", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>HELD</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>SSN in outbound draft</span>
-            </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "transparent" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c62</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:41:33</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>9</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.044</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", color: "#4E7360", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>ALLOWED</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>escalated to adjuster</span>
-            </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "transparent" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c4d</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:41:12</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>6</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.026</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", color: "#4E7360", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>ALLOWED</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>duplicate claim closed</span>
-            </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0", padding: "0", borderBottom: "1px solid #F4F4F0", background: "transparent" }}>
-              <span style={{ flex: "0 0 108px", padding: "9px 12px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#0B0B0B", whiteSpace: "nowrap" }}>run_8f2c39</span>
-              <span style={{ flex: "0 0 96px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", whiteSpace: "nowrap" }}>09:40:58</span>
-              <span style={{ flex: "0 0 62px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>7</span>
-              <span style={{ flex: "0 0 74px", padding: "9px 8px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "11px", color: "#8E8E88", textAlign: "right" }}>$0.030</span>
-              <span style={{ flex: "0 0 128px", padding: "9px 12px", fontSize: "11px", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "5px", background: "#EDF3EE", color: "#4E7360", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px" }}>ALLOWED</span></span>
-              <span style={{ flex: "0 0 150px", padding: "9px 12px", fontSize: "11.5px", color: "#8E8E88", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>tier-1 cover approved</span>
-            </div>
-            </div>
-
-          </div>
-
-          <div style={{ flex: "none", width: "244px", borderLeft: "1px solid #EFEFEB", background: "#FCFCFB", padding: "14px 15px", display: "none" }}>
-            <span></span>
-          </div>
-
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "9px 16px", borderTop: "1px solid #EFEFEB", background: "#FAFAF8", flexWrap: "wrap", rowGap: "6px" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "7px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#8E8E88" }}><span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--lz-accent,#C1502E)", animation: "lzPulse 2.2s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}></span>bedrock:claude-sonnet-4</span>
-          <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#C6C6C0" }}>|</span>
-          <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#8E8E88" }}>vpc-0a91f · us-east-1</span>
-          <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#C6C6C0" }}>|</span>
-          <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#8E8E88" }}>owner priya.raman@northbridge.com</span>
-          <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", color: "#8E8E88", whiteSpace: "nowrap" }}>p95 240ms</span>
-        </div>
-
-      </div>
-    </div>
-
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,360px),1fr))", gap: "clamp(14px,1.6vw,22px)" }}>
-
-      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(22px,2.2vw,32px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
-          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(21px,1.8vw,29px)", fontWeight: "500", letterSpacing: "-.026em", lineHeight: "1.16" }}>Register the agents you didn't build. <span style={{ color: "#A2A29C" }}>Nothing gets rewritten.</span></h3>
-          <a href="#cta" aria-label="Explore the registry" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "50%", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Register the agents you didn&apos;t build. <span data-dim="1">Nothing gets rewritten.</span></h3>
+          <a href="#cta" aria-label="Explore the registry" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
         </div>
-        <div style={{ marginTop: "clamp(22px,2.4vw,34px)", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "12px", overflow: "hidden" }}>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden" }}>
           <div style={{ display: "flex", gap: "8px", padding: "9px 14px", borderBottom: "1px solid #EFEFEB", background: "#FCFCFB", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2" }}>
             <span style={{ flex: "1.5" }}>agent</span><span style={{ flex: "1" }}>built on</span><span style={{ flex: ".85" }}>runs / day</span><span style={{ flex: ".6", textAlign: "right" }}>state</span>
           </div>
@@ -624,12 +311,12 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(22px,2.2vw,32px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
-          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(21px,1.8vw,29px)", fontWeight: "500", letterSpacing: "-.026em", lineHeight: "1.16" }}>Policy runs before the model does. <span style={{ color: "#A2A29C" }}>Every call, every time.</span></h3>
-          <a href="#cta" aria-label="Explore policy" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "50%", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Policy runs before the model does. <span data-dim="1">Every call, every time.</span></h3>
+          <a href="#cta" aria-label="Explore policy" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
         </div>
-        <div style={{ marginTop: "clamp(22px,2.4vw,34px)", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "12px", padding: "16px 14px" }}>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden", padding: "16px 14px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "11px" }}>
             <span>request</span><span>outcome</span>
           </div>
@@ -652,13 +339,12 @@ export default function LandingPage() {
         </div>
       </div>
 
-    </div>
-
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(14px,1.6vw,22px)", marginTop: "clamp(14px,1.6vw,22px)" }}>
-
-      <div data-reveal="1" data-card="1" style={{ flex: "1 1 calc(50% - 11px)", minWidth: "min(100%,258px)", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(20px,2vw,28px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <h3 style={{ margin: "0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>See every step an agent took. <span style={{ color: "#A2A29C" }}>Down to the token.</span></h3>
-        <div style={{ marginTop: "20px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "11px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>See every step an agent took. <span data-dim="1">Down to the token.</span></h3>
+          <a href="#cta" aria-label="Explore traces" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+        </div>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "4px" }}><span>claims triage</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", letterSpacing: "0", textTransform: "none", color: "#C6C6C0" }}>run_8f2c91</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: "9px" }}><span style={{ flex: "none", width: "54px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#BDBDB7" }}>retrieve</span><span style={{ flex: "1", height: "6px", borderRadius: "3px", background: "#F1F1ED", overflow: "hidden" }}><span style={{ display: "block", height: "100%", width: "34%", background: "#0B0B0B", transformOrigin: "left", animation: "lzBar 6s cubic-bezier(.4,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span></span><span style={{ flex: "none", width: "34px", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#8E8E88" }}>180ms</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: "9px" }}><span style={{ flex: "none", width: "54px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#BDBDB7" }}>plan</span><span style={{ flex: "1", height: "6px", borderRadius: "3px", background: "#F1F1ED", overflow: "hidden" }}><span style={{ display: "block", height: "100%", width: "58%", background: "#0B0B0B", transformOrigin: "left", animation: "lzBar 6s cubic-bezier(.4,0,.2,1) .3s infinite", animationPlayState: "var(--lz-play,running)" }}></span></span><span style={{ flex: "none", width: "34px", textAlign: "right", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#8E8E88" }}>420ms</span></div>
@@ -675,32 +361,33 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-card="1" style={{ flex: "1 1 calc(50% - 11px)", minWidth: "min(100%,258px)", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(20px,2vw,28px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <h3 style={{ margin: "0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Catch what shouldn't leave. <span style={{ color: "#A2A29C" }}>Before it does.</span></h3>
-        <div style={{ marginTop: "20px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "11px", padding: "14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "11px" }}><span>outbound</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", letterSpacing: "0", textTransform: "none", color: "#C6C6C0" }}>claims-triage · run 4c11</span></div>
-          <div style={{ border: "1px solid #EFEFEB", borderRadius: "7px", background: "#fff", padding: "14px 15px 13px", boxShadow: "0 1px 0 #F4F4F0,0 6px 14px -10px rgba(0,0,0,.14)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingBottom: "9px", borderBottom: "1px solid #F1F1ED" }}>
-              <span style={{ width: "14px", height: "14px", borderRadius: "3px", background: "#0B0B0B" }}></span>
-              <span style={{ fontSize: "10.5px", fontWeight: "600", letterSpacing: ".07em", textTransform: "uppercase" }}>Northbridge Mutual</span>
-              <span style={{ marginLeft: "auto", fontFamily: "'Silkscreen',monospace", fontSize: "7.5px", letterSpacing: ".13em", textTransform: "uppercase", color: "#A8A8A2" }}>claim decision</span>
-            </div>
-            <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2", padding: "9px 0 8px" }}>Ref CLM-2291-04 · 14 March 2026</div>
-            <p style={{ margin: "0 0 7px", fontSize: "10.5px", lineHeight: "1.72", color: "#44443F" }}>Dear <span style={{ position: "relative", display: "inline-block" }}>Ms A. Nkemdi<span style={{ position: "absolute", left: "-2px", right: "-2px", top: "0", bottom: "1px", background: "#0B0B0B", borderRadius: "2px", animation: "lzWipe 7s cubic-bezier(.4,0,.2,1) 0s infinite", animationPlayState: "var(--lz-play,running)" }}></span></span>,</p>
-            <p style={{ margin: "0 0 7px", fontSize: "10.5px", lineHeight: "1.72", color: "#44443F" }}>We have completed our review of the claim submitted against policy <span style={{ position: "relative", display: "inline-block" }}>NM-412-88-9930<span style={{ position: "absolute", left: "-2px", right: "-2px", top: "0", bottom: "1px", background: "#0B0B0B", borderRadius: "2px", animation: "lzWipe 7s cubic-bezier(.4,0,.2,1) .4s infinite", animationPlayState: "var(--lz-play,running)" }}></span></span>. Based on the treatment dates and the schedule of benefits in force on the date of loss, the claim qualifies for tier-2 cover with effect from 1 March 2026.</p>
-            <p style={{ margin: "0", fontSize: "10.5px", lineHeight: "1.72", color: "#8E8E88" }}>Yours sincerely,<br />Claims Triage · Northbridge Mutual</p>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Rehearse before you ship. <span data-dim="1">Fifty thousand times.</span></h3>
+          <a href="#cta" aria-label="Explore the simulation engine" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+        </div>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden", padding: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "10px" }}><span>simulation</span><span style={{ marginLeft: "auto" }}>claims-triage v15 · pre-prod</span></div>
+          <div style={{ display: "flex", gap: "10px", paddingBottom: "11px", borderBottom: "1px solid #F1F1ED" }}>
+            <div style={{ flex: "1" }}><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2" }}>scenarios</div><div style={{ fontSize: "16px", fontWeight: "500", letterSpacing: "-.02em", marginTop: "3px" }}>50,000</div></div>
+            <div style={{ flex: "1" }}><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2" }}>adversarial</div><div style={{ fontSize: "16px", fontWeight: "500", letterSpacing: "-.02em", marginTop: "3px" }}>2,400</div></div>
+            <div style={{ flex: "1" }}><div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9px", color: "#A8A8A2" }}>six sigma</div><div style={{ fontSize: "16px", fontWeight: "500", letterSpacing: "-.02em", marginTop: "3px" }}>5.8&#963;</div></div>
           </div>
-          <div style={{ marginTop: "13px", paddingTop: "11px", borderTop: "1px solid #F1F1ED", display: "flex", flexDirection: "column", gap: "7px", fontSize: "11.5px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "#8E8E88" }}>PII redacted</span><span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace" }}>2 spans</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "#8E8E88" }}>Grounding score</span><span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace" }}>0.96</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "#8E8E88" }}>Unsupported claims</span><span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", color: "var(--lz-accent,#C1502E)" }}>1 held</span></div>
+          <div style={{ marginTop: "11px", display: "flex", flexDirection: "column", gap: "9px", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10.5px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><span style={{ flex: "1", color: "#44443F" }}>tier-2 cover</span><span style={{ flex: "none", width: "70px", height: "4px", background: "#F1F1ED" }}><span style={{ display: "block", height: "100%", width: "99%", background: "#5C8A70" }}></span></span><span style={{ flex: "none", width: "44px", textAlign: "right", color: "#4E7360" }}>99.4%</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><span style={{ flex: "1", color: "#44443F" }}>duplicate claim</span><span style={{ flex: "none", width: "70px", height: "4px", background: "#F1F1ED" }}><span style={{ display: "block", height: "100%", width: "97%", background: "#5C8A70" }}></span></span><span style={{ flex: "none", width: "44px", textAlign: "right", color: "#4E7360" }}>97.2%</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><span style={{ flex: "1", color: "#44443F" }}>policy edge case</span><span style={{ flex: "none", width: "70px", height: "4px", background: "#F1F1ED" }}><span style={{ display: "block", height: "100%", width: "38%", background: "var(--lz-accent,#C1502E)" }}></span></span><span style={{ flex: "none", width: "44px", textAlign: "right", color: "var(--lz-accent,#C1502E)" }}>held</span></div>
           </div>
+          <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #F1F1ED", display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#8E8E88" }}><span>2 failures reproduced</span><span style={{ color: "var(--lz-accent,#C1502E)" }}>promotion blocked</span></div>
         </div>
       </div>
 
-      <div data-reveal="1" data-card="1" style={{ flex: "1 1 calc(50% - 11px)", minWidth: "min(100%,258px)", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(20px,2vw,28px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <h3 style={{ margin: "0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Know what each agent costs. <span style={{ color: "#A2A29C" }}>And what it sent back.</span></h3>
-        <div style={{ marginTop: "20px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "11px", padding: "14px" }}>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Know what each agent costs. <span data-dim="1">And what it sent back.</span></h3>
+          <a href="#cta" aria-label="Explore cost controls" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+        </div>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden", padding: "14px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2", paddingBottom: "12px" }}><span>cost / week</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", letterSpacing: "0", textTransform: "none", color: "#C6C6C0" }}>last 7</span></div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: "6px", height: "92px" }}>
             <span style={{ flex: "1", height: "38%", background: "#E9E9E3", borderRadius: "3px 3px 0 0", transformOrigin: "bottom", animation: "lzRise 7s cubic-bezier(.3,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span>
@@ -719,9 +406,12 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div data-reveal="1" data-card="1" style={{ flex: "1 1 calc(50% - 11px)", minWidth: "min(100%,258px)", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "20px", padding: "clamp(20px,2vw,28px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <h3 style={{ margin: "0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Or start from one already running. <span style={{ color: "#A2A29C" }}>A hundred of them.</span></h3>
-        <div style={{ marginTop: "20px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "11px", overflow: "hidden" }}>
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(20px,2.2vw,30px)", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+          <h3 style={{ margin: "0", flex: "1", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Or start from one already running. <span data-dim="1">A hundred of them.</span></h3>
+          <a href="#cta" aria-label="Explore blueprints" data-affordance="" style={{ flex: "none", width: "38px", height: "38px", borderRadius: "0", background: "#fff", border: "1px solid #E7E7E2", display: "grid", placeItems: "center", fontSize: "15px", color: "#5C5C58" }}>↗</a>
+        </div>
+        <div data-panel="" style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "0", flex: "1 1 auto", height: "clamp(230px,18vw,286px)", overflow: "hidden" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 13px", borderBottom: "1px solid #EFEFEB", background: "#FCFCFB", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2" }}><span>blueprints</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", letterSpacing: "0", textTransform: "none", color: "#C6C6C0" }}>bfsi · hr · support</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 13px", borderBottom: "1px solid #F4F4F0" }}><span style={{ width: "22px", height: "22px", borderRadius: "6px", background: "#F1F1ED", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#8E8E88" }}>JZ</span><span style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Jazon</span><span style={{ fontSize: "12px", color: "#A2A29C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>AI SDR</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#C6C6C0" }}>312 forks</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 13px", borderBottom: "1px solid #F4F4F0" }}><span style={{ width: "22px", height: "22px", borderRadius: "6px", background: "#F1F1ED", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#8E8E88" }}>DI</span><span style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Diane</span><span style={{ fontSize: "12px", color: "#A2A29C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>AI HR partner</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "#C6C6C0" }}>188 forks</span></div>
@@ -729,6 +419,7 @@ export default function LandingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 13px", background: "var(--lz-tint,#FBF3EF)", animation: "lzRowIn 8.5s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}><span style={{ width: "22px", height: "22px", borderRadius: "6px", background: "var(--lz-hair,#F1DED6)", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "var(--lz-ink2,#B08574)" }}>SK</span><span style={{ fontSize: "12.5px", fontWeight: "500", letterSpacing: "-.01em" }}>Skott</span><span style={{ fontSize: "12px", color: "#A2A29C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>AI marketer</span><span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "9.5px", color: "var(--lz-accent,#C1502E)" }}>CLONING</span></div>
         </div>
       </div>
+
 
     </div>
   </div>
@@ -738,48 +429,10 @@ export default function LandingPage() {
   <div style={{ maxWidth: "1280px", margin: "0 auto", textAlign: "center" }}>
     <h2 data-reveal="1" style={{ margin: "0 auto", maxWidth: "20em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Six tools. One agent.<br /><span style={{ color: "#A2A29C" }}>Nobody accountable.</span></h2>
     <p data-reveal="1" style={{ margin: "18px auto 0", maxWidth: "33em", fontSize: "clamp(16px,1.2vw,19px)", color: "#5C5C58", letterSpacing: "-.012em" }}>This is what taking a single agent to production looks like without a control plane.</p>
-    <div data-reveal="1" style={{ marginTop: "clamp(30px,3.6vw,52px)", borderRadius: "clamp(16px,1.8vw,22px)", overflow: "hidden", background: "#F4F4F1" }}>
-      <ImageSlot id="lz-sprawl" shape="rect" src="/assets/sprawl.png" placeholder="Tool-sprawl collage" style={{ width: "100%", height: "auto", aspectRatio: "16/8" }} />
+    <div data-reveal="1" data-collage="" style={{ margin: "clamp(30px,3.6vw,52px) auto 0", maxWidth: "1180px" }}>
+      <ImageSlot id="lz-sprawl" shape="rect" src="/assets/sprawl.jpg" fit="contain" placeholder="Six consoles, one agent, and no single owner" style={{ width: "100%", height: "auto", aspectRatio: "1666 / 944" }} />
     </div>
-    <p data-reveal="1" style={{ margin: "16px auto 0", fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".13em", textTransform: "uppercase", color: "#B8B8B2" }}>five systems · four owners · no audit trail</p>
-  </div>
-</section>
-
-<section id="build" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
-  <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-    <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "22em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Describe the agent.<br /><span style={{ color: "#A2A29C" }}>Architect builds the stack.</span></h2>
-    <div data-reveal="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(20px,2.4vw,40px)", alignItems: "center" }}>
-      <div style={{ flex: "1 1 300px", minWidth: "0" }}>
-        <p style={{ margin: "0", fontSize: "clamp(16px,1.2vw,19px)", color: "#3D3D39", letterSpacing: "-.012em", maxWidth: "26em" }}>Plain language in, a working agent out — logic, integrations, access control and interface, wired into the systems you already run. Governance is applied at build time, not bolted on afterwards.</p>
-        <a href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "22px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>Open Architect <span>→</span></a>
-      </div>
-      <div style={{ flex: "1.35 1 400px", minWidth: "0" }}>
-        <div style={{ background: "#fff", border: "1px solid #E7E7E2", borderRadius: "13px", padding: "16px", boxShadow: "0 20px 40px -30px rgba(0,0,0,.2)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid #EAEAE5", borderRadius: "10px", padding: "12px 13px", background: "#FCFCFB" }}>
-            <span style={{ flex: "none", width: "6px", height: "6px", borderRadius: "50%", background: "var(--lz-accent,#C1502E)" }}></span>
-            <span style={{ flex: "1", minWidth: "0", overflow: "hidden", whiteSpace: "nowrap", fontSize: "13.5px", letterSpacing: "-.01em", color: "#3D3D39" }}><span style={{ display: "inline-block", overflow: "hidden", whiteSpace: "nowrap", verticalAlign: "bottom", animation: "lzWipe 9s steps(46,end) infinite", animationPlayState: "var(--lz-play,running)" }}>An agent that reviews vendor contracts against our policy</span><span style={{ display: "inline-block", width: "6px", height: "14px", background: "var(--lz-accent,#C1502E)", verticalAlign: "-2px", marginLeft: "2px", animation: "lzCaret 1s step-end infinite", animationPlayState: "var(--lz-play,running)" }}></span></span>
-            <span style={{ flex: "none", fontSize: "12px", fontWeight: "500", padding: "7px 13px", borderRadius: "7px", background: "var(--lz-accent,#C1502E)", color: "#fff" }}>Build</span>
-          </div>
-          <div style={{ marginTop: "16px", padding: "18px 12px", borderRadius: "10px", background: "#FAFAF8", border: "1px solid #F0F0EC" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", alignItems: "center" }}>
-              <span style={{ padding: "7px 11px", borderRadius: "8px", background: "#fff", border: "1px solid #E7E7E2", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", animation: "lzNode 9s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}>intake</span>
-              <span style={{ color: "#D6D6D0", fontSize: "11px", animation: "lzNode 9s ease-in-out .2s infinite", animationPlayState: "var(--lz-play,running)" }}>—</span>
-              <span style={{ padding: "7px 11px", borderRadius: "8px", background: "#fff", border: "1px solid #E7E7E2", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", animation: "lzNode 9s ease-in-out .4s infinite", animationPlayState: "var(--lz-play,running)" }}>clause extract</span>
-              <span style={{ color: "#D6D6D0", fontSize: "11px", animation: "lzNode 9s ease-in-out .6s infinite", animationPlayState: "var(--lz-play,running)" }}>—</span>
-              <span style={{ padding: "7px 11px", borderRadius: "8px", background: "#fff", border: "1px solid #E7E7E2", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", animation: "lzNode 9s ease-in-out .8s infinite", animationPlayState: "var(--lz-play,running)" }}>policy match</span>
-              <span style={{ color: "#D6D6D0", fontSize: "11px", animation: "lzNode 9s ease-in-out 1s infinite", animationPlayState: "var(--lz-play,running)" }}>—</span>
-              <span style={{ padding: "7px 11px", borderRadius: "8px", background: "var(--lz-accent,#C1502E)", color: "#fff", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "10px", animation: "lzNode 9s ease-in-out 1.2s infinite", animationPlayState: "var(--lz-play,running)" }}>human sign-off</span>
-            </div>
-            <div style={{ marginTop: "15px", display: "flex", flexWrap: "wrap", gap: "13px", justifyContent: "center", fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".11em", textTransform: "uppercase", color: "#A8A8A2" }}>
-              <span style={{ animation: "lzNode 9s ease-in-out 1.4s infinite", animationPlayState: "var(--lz-play,running)" }}>sharepoint</span>
-              <span style={{ animation: "lzNode 9s ease-in-out 1.55s infinite", animationPlayState: "var(--lz-play,running)" }}>sap</span>
-              <span style={{ animation: "lzNode 9s ease-in-out 1.7s infinite", animationPlayState: "var(--lz-play,running)" }}>okta rbac</span>
-              <span style={{ animation: "lzNode 9s ease-in-out 1.85s infinite", animationPlayState: "var(--lz-play,running)" }}>audit log</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <p data-reveal="1" style={{ margin: "16px auto 0", fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".13em", textTransform: "uppercase", color: "#B8B8B2" }}>six systems · four owners · no audit trail</p>
   </div>
 </section>
 
@@ -795,7 +448,7 @@ export default function LandingPage() {
       </div>
       <a href="#cta" style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginTop: "24px", fontSize: "16px", fontWeight: "500", color: "var(--lz-accent,#C1502E)" }}>Read the security brief <span>→</span></a>
     </div>
-    <div data-reveal="1" style={{ flex: "1 1 400px", minWidth: "0", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(22px,2.6vw,40px)" }}>
+    <div data-reveal="1" data-squircle="" style={{ flex: "1 1 400px", minWidth: "0", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(22px,2.6vw,40px)" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div style={{ width: "100%", maxWidth: "340px", background: "#fff", border: "1px solid #E7E7E2", borderRadius: "12px", padding: "15px 16px", display: "flex", alignItems: "center", gap: "11px", animation: "lzDrift 7s ease-in-out infinite", animationPlayState: "var(--lz-play,running)" }}>
           <img src="/assets/lyzr-wordmark-light.png" alt="" width="441" height="170" style={{ display: "block", height: "15px", width: "auto", filter: "invert(1)" }} />
@@ -823,8 +476,8 @@ export default function LandingPage() {
 
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "clamp(26px,3.4vw,58px)", alignItems: "center" }}>
-    <div data-reveal="1" style={{ flex: "1.25 1 420px", minWidth: "0", position: "relative", borderRadius: "clamp(16px,1.8vw,20px)", overflow: "hidden", background: "#F4F4F1" }}>
-      <ImageSlot id="lz-story" shape="rect" src="/assets/story-ops.png" placeholder="Customer operations floor" style={{ width: "100%", height: "auto", aspectRatio: "16/10" }} />
+    <div data-reveal="1" data-squircle="" style={{ flex: "1.25 1 420px", minWidth: "0", position: "relative", borderRadius: "clamp(16px,1.8vw,20px)", overflow: "hidden", background: "#F4F4F1" }}>
+      <ImageSlot id="lz-story" shape="rect" src="/assets/story-ops.jpg" placeholder="Customer operations floor" style={{ width: "100%", height: "auto", aspectRatio: "16/10" }} />
       <div style={{ position: "absolute", left: "0", right: "0", bottom: "0", padding: "20px", background: "linear-gradient(180deg,transparent,rgba(11,11,11,.62))", pointerEvents: "none" }}>
         <span style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8.5px", letterSpacing: ".13em", textTransform: "uppercase", color: "rgba(255,255,255,.82)" }}>airasia move · customer operations</span>
       </div>
@@ -842,7 +495,7 @@ export default function LandingPage() {
 </section>
 
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
-  <div data-reveal="1" style={{ maxWidth: "1280px", margin: "0 auto", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,2.2vw,32px)", alignItems: "stretch" }}>
+  <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(20px,2.4vw,34px)", display: "flex", flexWrap: "wrap", gap: "clamp(18px,2.2vw,32px)", alignItems: "stretch" }}>
 
     <div style={{ flex: "1 1 250px", minWidth: "0", maxWidth: "340px", display: "flex", flexDirection: "column", gap: "12px" }}>
       <div style={{ borderRadius: "14px", overflow: "hidden", background: "#E9E9E4", flex: "1 1 auto" }}>
@@ -881,7 +534,7 @@ export default function LandingPage() {
 <section style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(28px,3vw,44px)", maxWidth: "24em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>A platform, and the engineers who ship it. <span style={{ color: "#A2A29C" }}>Eight weeks, typically.</span></h2>
-    <div data-reveal="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(24px,2.8vw,44px)" }}>
+    <div data-reveal="1" data-squircle="" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "clamp(18px,2vw,24px)", padding: "clamp(24px,2.8vw,44px)" }}>
       <div style={{ position: "relative", height: "2px", background: "#E4E4DF", borderRadius: "2px", margin: "0 0 30px" }}><span style={{ position: "absolute", inset: "0", background: "var(--lz-accent,#C1502E)", borderRadius: "2px", transformOrigin: "left", animation: "lzBar 10s cubic-bezier(.4,0,.2,1) infinite", animationPlayState: "var(--lz-play,running)" }}></span></div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,190px),1fr))", gap: "clamp(18px,2.2vw,34px)" }}>
         <div>
@@ -917,23 +570,23 @@ export default function LandingPage() {
   <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
     <h2 data-reveal="1" style={{ margin: "0 0 clamp(28px,3vw,44px)", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Take something with you.</h2>
     <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
-      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", background: "#F4F4F1", borderRadius: "20px", overflow: "hidden", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <ImageSlot id="lz-res-1" shape="rect" src="/assets/cover-1.png" placeholder="Cover — agentic roadmap playbook" style={{ width: "100%", height: "auto", aspectRatio: "5/3" }} />
-        <div style={{ padding: "22px 22px 26px" }}>
+      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", display: "flex", flexDirection: "column", gap: "clamp(10px,1vw,14px)" }}>
+        <div data-squircle="" data-res-media="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", overflow: "hidden" }}><ImageSlot id="lz-res-1" shape="rect" src="/assets/cover-3.png" position="center top" placeholder="The Agentic AI Roadmap — playbook cover" style={{ width: "100%", height: "auto", aspectRatio: "2 / 3" }} /></div>
+        <div data-squircle="" data-res-body="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", padding: "20px 22px 24px", flex: "1 1 auto" }}>
           <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>playbook</div>
           <div style={{ fontSize: "19px", fontWeight: "500", letterSpacing: "-.022em", marginTop: "10px", lineHeight: "1.25" }}>Building an agentic roadmap for 2026</div>
         </div>
       </a>
-      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", background: "#F4F4F1", borderRadius: "20px", overflow: "hidden", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <ImageSlot id="lz-res-2" shape="rect" placeholder="Cover — 101 enterprise AI use cases" style={{ width: "100%", height: "auto", aspectRatio: "5/3" }} />
-        <div style={{ padding: "22px 22px 26px" }}>
+      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", display: "flex", flexDirection: "column", gap: "clamp(10px,1vw,14px)" }}>
+        <div data-squircle="" data-res-media="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", overflow: "hidden" }}><ImageSlot id="lz-res-2" shape="rect" src="/assets/cover-1.png" position="center top" placeholder="101 Enterprise AI Use Cases — template cover" style={{ width: "100%", height: "auto", aspectRatio: "2 / 3" }} /></div>
+        <div data-squircle="" data-res-body="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", padding: "20px 22px 24px", flex: "1 1 auto" }}>
           <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>library</div>
           <div style={{ fontSize: "19px", fontWeight: "500", letterSpacing: "-.022em", marginTop: "10px", lineHeight: "1.25" }}>101 use cases you could deploy today</div>
         </div>
       </a>
-      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", background: "#F4F4F1", borderRadius: "20px", overflow: "hidden", transition: "transform .45s cubic-bezier(.16,1,.3,1)" }}>
-        <ImageSlot id="lz-res-3" shape="rect" placeholder="Cover — prototype to production guide" style={{ width: "100%", height: "auto", aspectRatio: "5/3" }} />
-        <div style={{ padding: "22px 22px 26px" }}>
+      <a data-reveal="1" data-card="1" href="#cta" style={{ flex: "1 1 250px", minWidth: "0", display: "flex", flexDirection: "column", gap: "clamp(10px,1vw,14px)" }}>
+        <div data-squircle="" data-res-media="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", overflow: "hidden" }}><ImageSlot id="lz-res-3" shape="rect" src="/assets/cover-2.png" position="center top" placeholder="Prototype to Production — field guide cover" style={{ width: "100%", height: "auto", aspectRatio: "2 / 3" }} /></div>
+        <div data-squircle="" data-res-body="" style={{ background: "#F4F4F1", borderRadius: "clamp(16px,1.8vw,22px)", padding: "20px 22px 24px", flex: "1 1 auto" }}>
           <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>guide</div>
           <div style={{ fontSize: "19px", fontWeight: "500", letterSpacing: "-.022em", marginTop: "10px", lineHeight: "1.25" }}>Getting a prototype past the valley of death</div>
         </div>
@@ -942,8 +595,57 @@ export default function LandingPage() {
   </div>
 </section>
 
+<section id="tiers" style={{ padding: "0 clamp(18px,4vw,48px) clamp(76px,9vw,132px)" }}>
+  <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+    <h2 data-reveal="1" style={{ margin: "0 0 clamp(30px,3.4vw,50px)", maxWidth: "22em", fontSize: "clamp(30px,3.7vw,58px)", fontWeight: "500", letterSpacing: "-.036em", lineHeight: "1.03" }}>Start where you already are.<br /><span data-dim="1">Three ways in, one control plane.</span></h2>
+
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,300px),1fr))", gap: "clamp(14px,1.6vw,22px)", alignItems: "stretch" }}>
+
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(18px,2vw,26px)" }}>
+        <div>
+          <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>control plane · self-serve</div>
+          <h3 style={{ margin: "12px 0 0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Govern what already runs. <span data-dim="1">Nothing moves.</span></h3>
+          <p style={{ margin: "12px 0 0", fontSize: "14.5px", lineHeight: "1.55", color: "#4A4A46" }}>Register the agents your teams already built on Bedrock, Azure, LangChain or Agentforce. Add policy, traces and audit without a rewrite.</p>
+        </div>
+        <dl style={{ margin: "auto 0 0", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>First agent live</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>48h</dd></div>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>Your VPC</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>$0.03 / run</dd></div>
+        </dl>
+        <a href="#cta" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "9px", padding: "13px 20px", borderRadius: "0", background: "var(--lz-accent,#C1502E)", color: "#fff", fontSize: "15px", fontWeight: "500" }}>Start in Agent Studio <span aria-hidden="true">&#8594;</span></a>
+      </div>
+
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(18px,2vw,26px)" }}>
+        <div>
+          <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>agentic os · co-build</div>
+          <h3 style={{ margin: "12px 0 0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Run a whole function. <span data-dim="1">Not one workflow.</span></h3>
+          <p style={{ margin: "12px 0 0", fontSize: "14.5px", lineHeight: "1.55", color: "#4A4A46" }}>A dedicated agent stack for HR, marketing, finance or service. Agents share context, feed each other, and sharpen with every cycle.</p>
+        </div>
+        <dl style={{ margin: "auto 0 0", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>Pre-built agents</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>400+</dd></div>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>Objective to live</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>8 weeks</dd></div>
+        </dl>
+        <a href="#cta" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "9px", padding: "13px 20px", borderRadius: "0", background: "#fff", border: "1px solid #DEDED9", color: "#0B0B0B", fontSize: "15px", fontWeight: "500" }}>Explore Agentic OS <span aria-hidden="true">&#8594;</span></a>
+      </div>
+
+      <div data-reveal="1" data-card="1" style={{ background: "#F4F4F1", backgroundImage: "radial-gradient(#E0E0D9 1px,transparent 1px)", backgroundSize: "15px 15px", backgroundPosition: "-1px -1px", borderRadius: "0", padding: "clamp(22px,2.2vw,32px)", display: "flex", flexDirection: "column", gap: "clamp(18px,2vw,26px)" }}>
+        <div>
+          <div style={{ fontFamily: "'Silkscreen',monospace", fontSize: "8px", letterSpacing: ".12em", textTransform: "uppercase", color: "#A8A8A2" }}>sovereign ai · regulated</div>
+          <h3 style={{ margin: "12px 0 0", fontSize: "clamp(19px,1.4vw,23px)", fontWeight: "500", letterSpacing: "-.022em", lineHeight: "1.2" }}>Air-gapped, on your own iron. <span data-dim="1">Nothing leaves.</span></h3>
+          <p style={{ margin: "12px 0 0", fontSize: "14.5px", lineHeight: "1.55", color: "#4A4A46" }}>Full stack inside your walls, for banks, insurers and government. Your models, your hardware, your keys, and a complete audit trail.</p>
+        </div>
+        <dl style={{ margin: "auto 0 0", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>Data leaving</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>0%</dd></div>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "10px 0", borderTop: "1px solid #E4E4DF", fontSize: "13.5px" }}><dt style={{ margin: "0", color: "#63635D" }}>vs frontier API cost</dt><dd style={{ margin: "0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: "12px" }}>&#8722;95%</dd></div>
+        </dl>
+        <a href="#cta" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "9px", padding: "13px 20px", borderRadius: "0", background: "#fff", border: "1px solid #DEDED9", color: "#0B0B0B", fontSize: "15px", fontWeight: "500" }}>Talk to us <span aria-hidden="true">&#8594;</span></a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <section id="cta" style={{ padding: "0 clamp(18px,4vw,48px) clamp(70px,8vw,120px)" }}>
-  <div data-reveal="1" style={{ maxWidth: "1280px", margin: "0 auto", background: "#0B0B0B", borderRadius: "clamp(18px,2vw,26px)", padding: "clamp(48px,7vw,116px) clamp(24px,4vw,64px)", textAlign: "center", position: "relative", overflow: "hidden" }}>
+  <div data-reveal="1" data-squircle="" style={{ maxWidth: "1280px", margin: "0 auto", background: "#0B0B0B", borderRadius: "clamp(18px,2vw,26px)", padding: "clamp(48px,7vw,116px) clamp(24px,4vw,64px)", textAlign: "center", position: "relative", overflow: "hidden" }}>
     <div style={{ position: "absolute", left: "50%", top: "0", width: "min(760px,110%)", height: "100%", transform: "translateX(-50%)", background: "radial-gradient(60% 55% at 50% 0%,var(--lz-glow,rgba(193,80,46,.4)),transparent 70%)", pointerEvents: "none" }}></div>
     <div style={{ position: "relative" }}>
       <h2 style={{ margin: "0 auto", maxWidth: "18em", fontSize: "clamp(32px,4.4vw,70px)", fontWeight: "500", letterSpacing: "-.04em", lineHeight: "1.02", color: "#fff" }}>Bring a use case.<br /><span style={{ color: "var(--lz-lite,#E08A67)" }}>Leave with an agent in production.</span></h2>

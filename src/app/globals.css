@@ -138,3 +138,158 @@ button {
   22%, 94% { opacity: 1; transform: none; }
   100% { opacity: 0; }
 }
+
+/* ------------------------------------------------------------------
+   Product-surface cards (the bento).
+
+   Square outer shape on purpose: these read as filed records, not app
+   tiles. Hover completes the claim rather than just moving the box —
+   the grey half of the heading resolves to ink, the affordance inverts,
+   and the data panel's border darkens. Motion is minimal because the
+   cards contain dense tables that wobble under a big transform.
+   ------------------------------------------------------------------ */
+
+[data-dim="1"] {
+  color: #A2A29C;
+  transition: color .4s cubic-bezier(.16, 1, .3, 1);
+}
+
+[data-card="1"] {
+  transition:
+    box-shadow .45s cubic-bezier(.16, 1, .3, 1),
+    transform .45s cubic-bezier(.16, 1, .3, 1),
+    background-color .35s ease;
+}
+
+[data-card="1"] [data-panel] {
+  transition: border-color .35s ease, box-shadow .35s ease;
+}
+
+[data-card="1"] [data-affordance] {
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .4s cubic-bezier(.16, 1, .3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-card="1"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 46px -34px rgba(0, 0, 0, .32);
+  }
+
+  [data-card="1"]:hover [data-dim="1"] {
+    color: #0B0B0B;
+  }
+
+  [data-card="1"]:hover [data-panel] {
+    border-color: #0B0B0B;
+  }
+
+  [data-card="1"]:hover [data-affordance] {
+    background: #0B0B0B;
+    border-color: #0B0B0B;
+    color: #fff;
+    transform: translate(2px, -2px);
+  }
+}
+
+[data-card="1"]:focus-visible {
+  outline: 2px solid var(--lz-accent, #C1502E);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dim="1"],
+  [data-card="1"],
+  [data-card="1"] [data-panel],
+  [data-card="1"] [data-affordance] { transition: none; }
+  [data-card="1"]:hover,
+  [data-card="1"]:hover [data-affordance] { transform: none; }
+}
+
+/* ------------------------------------------------------------------
+   Hero ground — a dot field, masked only enough that the headline keeps
+   its contrast. Fades out at the bottom so it hands off cleanly to the
+   lifecycle frame peeking below the fold.
+   ------------------------------------------------------------------ */
+
+#top {
+  position: relative;
+  isolation: isolate;
+}
+
+#top::before {
+  content: "";
+  position: absolute;
+  /* bleeds past the hero so the field carries into the top of the
+     lifecycle section instead of stopping on a section seam */
+  inset: -1px 0 clamp(-560px, -38vh, -300px);
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(#E2E2DC 1.3px, transparent 1.3px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+  -webkit-mask-image: linear-gradient(#000 0%, #000 55%, rgba(0,0,0,.55) 76%, transparent 100%);
+  mask-image: linear-gradient(#000 0%, #000 55%, rgba(0,0,0,.55) 76%, transparent 100%);
+}
+
+/* ------------------------------------------------------------------
+   Squircle corners on holders — the containers and backdrops, not the
+   controls. A superellipse reads softer than an arc at these radii,
+   which is the whole reason to reach for it; small UI chrome keeps
+   plain radii because the difference is invisible below ~14px.
+   Progressive: browsers without corner-shape keep the border-radius.
+   ------------------------------------------------------------------ */
+
+@supports (corner-shape: squircle) {
+  [data-squircle] {
+    corner-shape: squircle;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Tool-sprawl collage on small screens.
+
+   The collage only works if you recognise the artifacts in it. Scaled
+   to a phone it renders its labels at ~2px, which is not a small
+   version of the idea — it is a grey smear. Let it keep a legible
+   minimum width and scroll horizontally instead.
+   ------------------------------------------------------------------ */
+
+@media (max-width: 760px) {
+  [data-collage] {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-collage] > * {
+    min-width: 900px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Resource cards are two stacked blocks, not one card with an inset
+   image: a media holder the cover bleeds out of, and a separate text
+   panel beneath it. The hover shadow therefore belongs on the blocks,
+   since the anchor itself has no surface of its own.
+   ------------------------------------------------------------------ */
+
+[data-res-media],
+[data-res-body] {
+  transition: box-shadow .45s cubic-bezier(.16, 1, .3, 1), background-color .35s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-card="1"]:hover [data-res-media],
+  [data-card="1"]:hover [data-res-body] {
+    box-shadow: 0 20px 42px -32px rgba(0, 0, 0, .34);
+  }
+
+  [data-card="1"]:hover [data-res-body] {
+    background: #EFEFEB;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-res-media],
+  [data-res-body] { transition: none; }
+}
