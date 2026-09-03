@@ -409,7 +409,16 @@ function Avatar({ initials, size }: { initials: string; size?: "sm" }) {
 function Mark({ src }: { src: string }) {
   return (
     /* eslint-disable-next-line @next/next/no-img-element */
-    <img className={s.mark} src={src} alt="" aria-hidden="true" width={16} height={16} />
+    <img
+      className={s.mark}
+      src={src}
+      alt=""
+      aria-hidden="true"
+      width={16}
+      height={16}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
 

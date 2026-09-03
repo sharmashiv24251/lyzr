@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
   --lz-accent: #C1502E;
   --lz-tint: color-mix(in oklch, var(--lz-accent) 8%, white);
@@ -42,7 +40,7 @@ body {
   margin: 0;
   background: #fff;
   color: #0B0B0B;
-  font-family: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   font-size: 17px;
   line-height: 1.55;
   text-wrap: pretty;
@@ -101,7 +99,7 @@ button:active,
   transform: translateY(0) scale(1);
 }
 
-/* Subtle, non-shifting entrance for above-the-fold Hero content */
+/* Keep the desktop entrance, where it is already fast. */
 #top [data-reveal] {
   transform: translateY(12px);
   transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
@@ -110,6 +108,18 @@ button:active,
 #top [data-reveal].lz-in {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Above-the-fold content must be immediately paintable on phones. Waiting
+   for hydration here delays both FCP and LCP on slower mobile devices. */
+@media (max-width: 768px) {
+  #top [data-reveal],
+  #top [data-reveal].lz-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -464,6 +474,15 @@ button:active,
   .lz-mobile-platform {
     display: block !important;
   }
+
+  /* The video poster is inside the initial phone viewport and can be the LCP
+     element. It must not wait for the reveal observer or hydration. */
+  .lz-mobile-platform [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -536,7 +555,7 @@ button:active,
 
 .lz-brand-sub {
   display: block;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 9px;
   color: #BDBDB7;
   text-align: center;

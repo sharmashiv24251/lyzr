@@ -11,18 +11,47 @@ export default function PlatformVideo() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    let cancelScheduledStart: (() => void) | undefined;
 
-    // Don't pull the 23 MB source on page load. preload="none" keeps it
-    // unloaded; we only call load()/play() once the section scrolls into view.
+    // Keep the video itself out of the critical rendering path. The optimized
+    // poster paints immediately; playback starts after the browser has had a
+    // chance to finish the initial mobile paint.
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            video.load();
-            video.play().catch(() => {
-              // Autoplay may be deferred until user interaction
-            });
+            if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+              video.play().catch(() => {});
+              continue;
+            }
+            if (cancelScheduledStart) continue;
+
+            const startPlayback = () => {
+              cancelScheduledStart = undefined;
+              video.load();
+              video.play().catch(() => {
+                // Autoplay may be deferred until user interaction
+              });
+            };
+
+            let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
+            const scheduleAfterLoad = () => {
+              timeoutId = globalThis.setTimeout(startPlayback, 800);
+            };
+
+            if (document.readyState === "complete") {
+              scheduleAfterLoad();
+            } else {
+              window.addEventListener("load", scheduleAfterLoad, { once: true });
+            }
+
+            cancelScheduledStart = () => {
+              window.removeEventListener("load", scheduleAfterLoad);
+              if (timeoutId !== undefined) globalThis.clearTimeout(timeoutId);
+            };
           } else {
+            cancelScheduledStart?.();
+            cancelScheduledStart = undefined;
             video.pause();
           }
         }
@@ -31,7 +60,10 @@ export default function PlatformVideo() {
     );
     observer.observe(video);
 
-    return () => observer.disconnect();
+    return () => {
+      cancelScheduledStart?.();
+      observer.disconnect();
+    };
   }, []);
 
   const toggleSound = (e: React.MouseEvent) => {
@@ -128,7 +160,7 @@ export default function PlatformVideo() {
                 muted={isMuted}
                 playsInline
                 preload="none"
-                poster="/assets/one-studio-poster.webp"
+                poster="/assets/one-studio-poster-mobile.webp"
               >
                 <source src="/assets/one-studio.webm" type="video/webm" />
                 <source

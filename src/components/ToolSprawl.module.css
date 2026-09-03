@@ -39,7 +39,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1400 / 900;
-  font-family: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   color: var(--ink);
   letter-spacing: -0.006em;
   text-align: left;
